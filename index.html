@@ -361,7 +361,6 @@
       color: #fff;
       font-weight: 800;
       padding: 12px 18px;
-      margin-bottom: 18px;
     }
     .report-section-title {
       margin: 10px 0 12px;
@@ -382,8 +381,17 @@
       border-radius: 10px;
       background: #fff;
       padding: 16px;
+      min-height: 220px;
     }
     .report-text { white-space: pre-wrap; font-size: 16px; }
+    .report-placeholder {
+      min-height: 160px;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+    }
     .ai-actions {
       display: flex;
       align-items: center;
@@ -417,7 +425,7 @@
       background: #5eead4;
       transition: width .15s linear;
     }
-    .generate.generating {
+    .generate.generating, .final-generate.generating {
       background: #9db7f5;
       cursor: progress;
     }
@@ -1094,11 +1102,18 @@ ${state.basic.name}様は転倒後、すぐに反応があり、会話も成立�
     function renderReport() {
       const witnessed = state.selected.witness.includes("はい");
       const reportText = witnessed ? witnessedReportText() : unwitnessedReportText();
+      const generatedReport = state.generatedTexts.report || "";
       return `<h2 class="screen-title">最終報告書の作成</h2>
-        <div class="final-report">
+        <div class="final-report" data-ai-box="report">
           <h3>最終報告書（AI生成）</h3>
           <p class="report-lead">前段で作成した内部共有文・連絡文を統合し、最終報告書をAIが作成します。氏名・施設名は送信前に自動で匿名化されます。</p>
-          <button class="final-generate" type="button">最終報告書を生成</button>
+          <div class="ai-actions">
+            <button class="final-generate" type="button" data-generate-key="report" data-ai="1">最終報告書を生成</button>
+            <div class="ai-progress" data-progress-key="report">
+              <div class="ai-bar"><span></span></div>
+              <div class="ai-progress-label">7%生成中...（1秒経過）</div>
+            </div>
+          </div>
           <h3 class="report-section-title">基本情報</h3>
           <table class="report-table basic">
             <tr><th>施設名</th><td>テスト施設</td></tr>
@@ -1117,7 +1132,7 @@ ${state.basic.name}様は転倒後、すぐに反応があり、会話も成立�
             <tr><th>ご家族への連絡</th><td>連絡済み</td></tr>
           </table>
           <h3 class="report-body-title">報告書本文</h3>
-          <div class="report-text-box"><div class="report-text">${reportText}</div>${stampTable()}</div>
+          <div class="report-text-box" data-report-output>${generatedReport ? `<div class="report-text">${generatedReport}</div>${stampTable()}` : `<div class="report-placeholder">最終報告書を生成するとここに表示されます</div>`}</div>
         </div>`;
     }
 
@@ -1245,6 +1260,7 @@ ${state.basic.name}様が食堂・デイルームの床に倒れている状態�
       if (key === "inside") return insideText();
       if (key === "medical") return medicalText();
       if (key === "family") return familyText();
+      if (key === "report") return state.selected.witness.includes("はい") ? witnessedReportText() : unwitnessedReportText();
       return "";
     }
 
@@ -1252,6 +1268,7 @@ ${state.basic.name}様が食堂・デイルームの床に倒れている状態�
       const box = document.querySelector(`[data-ai-box="${key}"]`);
       if (!box) return;
       const textarea = box.querySelector(`[data-textarea-key="${key}"]`);
+      const reportOutput = box.querySelector("[data-report-output]");
       const button = box.querySelector(`[data-generate-key="${key}"]`);
       const progress = box.querySelector(`[data-progress-key="${key}"]`);
       const bar = progress?.querySelector(".ai-bar span");
@@ -1264,7 +1281,8 @@ ${state.basic.name}様が食堂・デイルームの床に倒れている状態�
         return;
       }
 
-      textarea.value = "";
+      if (textarea) textarea.value = "";
+      if (reportOutput) reportOutput.innerHTML = `<div class="report-placeholder">AIが最終報告書を作成しています</div>`;
       button.disabled = true;
       button.classList.add("generating");
       button.textContent = "生成中...";
