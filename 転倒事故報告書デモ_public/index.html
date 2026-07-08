@@ -1,0 +1,1308 @@
+﻿<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ポチって - 事故報告書デモ</title>
+  <style>
+    :root {
+      --bg: #f7f7f4;
+      --panel: #fff;
+      --line: #e2e5ea;
+      --muted: #667085;
+      --ink: #0f172a;
+      --brand: #00a3ad;
+      --green: #10b981;
+      --navy: #0f172a;
+      --blue: #2563eb;
+      --blue-soft: #eff6ff;
+      --shadow: 0 1px 3px rgba(16, 24, 40, .12), 0 1px 2px rgba(16, 24, 40, .08);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Yu Gothic UI", "Meiryo", system-ui, sans-serif;
+      letter-spacing: 0;
+    }
+    button, input, select, textarea { font: inherit; }
+    button {
+      min-height: 42px;
+      border: 1px solid #d9dde5;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      padding: 9px 18px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    button:hover { border-color: #bcc4d1; }
+    .primary { border-color: var(--navy); background: var(--navy); color: #fff; }
+    .teal { border-color: var(--brand); background: var(--brand); color: #fff; }
+    .green { border-color: var(--green); background: var(--green); color: #fff; }
+    .ghost { background: transparent; }
+    .hidden { display: none !important; }
+
+    .logo-line {
+      height: 78px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 42px;
+      background: #fff;
+      border-bottom: 1px solid #eceff3;
+    }
+    .logo { display: flex; align-items: center; gap: 12px; color: var(--brand); font-weight: 900; font-size: 28px; }
+    .logo-mark {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      background: var(--brand);
+      color: #fff;
+      font-size: 18px;
+    }
+    .role { margin-left: 12px; border-radius: 999px; background: #fff4cc; color: #9a6700; padding: 4px 12px; font-size: 13px; }
+    .facility { display: flex; align-items: center; gap: 18px; color: #475467; }
+    .cache { color: var(--brand); border-color: #cfe7ea; }
+
+    .page {
+      width: min(1826px, calc(100vw - 70px));
+      margin: 28px auto 60px;
+    }
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+    h1 { margin: 0; font-size: 32px; }
+    .toolbar-actions { display: flex; flex-wrap: wrap; gap: 16px; }
+    .table-wrap {
+      overflow: hidden;
+      border-radius: 14px;
+      background: #fff;
+    }
+    table { width: 100%; border-collapse: collapse; background: #fff; }
+    th, td { border-bottom: 1px solid #edf0f3; padding: 24px; text-align: left; font-size: 21px; vertical-align: middle; }
+    th { color: #667085; font-size: 19px; font-weight: 800; }
+    .pill { display: inline-flex; align-items: center; border-radius: 999px; padding: 4px 12px; background: #efe7ff; color: #6d28d9; font-weight: 900; font-size: 16px; }
+    .row-actions { display: flex; gap: 10px; align-items: center; white-space: nowrap; }
+    .small-btn { min-height: 38px; padding: 7px 14px; }
+    .ok-btn { border-color: #bbf7d0; background: #f0fdf4; color: #15803d; }
+    .blue-btn { border-color: #bae6fd; background: #f0f9ff; color: #0369a1; }
+    .red-btn { border-color: #fecaca; background: #fff1f2; color: #dc2626; }
+    .yellow-btn { border-color: #fde68a; background: #fffbeb; color: #a16207; }
+
+    .wizard-shell {
+      width: min(854px, calc(100vw - 40px));
+      margin: 28px auto 60px;
+    }
+    .facility-label {
+      margin: 0 0 12px;
+      color: var(--brand);
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .card {
+      overflow: hidden;
+      border: 1px solid #d9dde5;
+      border-radius: 20px;
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+    .card-head {
+      padding: 20px 28px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+    .step-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: 800; }
+    .count { color: #667085; font-weight: 500; }
+    .bar { height: 5px; border-radius: 999px; background: #e7ebf0; overflow: hidden; }
+    .bar span { display: block; height: 100%; width: 10%; background: var(--green); border-radius: inherit; transition: width .2s ease; }
+    .card-body { padding: 34px 32px 36px; }
+    .card-foot {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      padding: 18px 28px;
+      border-top: 1px solid var(--line);
+      background: #f8fafc;
+    }
+    .foot-right { display: flex; gap: 12px; align-items: center; }
+    .screen-title { margin: 0 0 28px; font-size: 30px; line-height: 1.35; }
+    label { display: block; color: #667085; font-weight: 800; margin: 16px 0 8px; }
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid #d9dde5;
+      border-radius: 12px;
+      background: #fff;
+      padding: 14px 16px;
+      color: #111827;
+    }
+    input[readonly] { background: #f4f4f5; }
+    textarea { min-height: 190px; resize: vertical; line-height: 1.7; }
+    .form-grid { display: grid; gap: 12px; }
+    .inline { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .inline select, .inline input { width: auto; min-width: 84px; }
+    .seg { display: inline-flex; overflow: hidden; border-radius: 9px; background: #111827; padding: 4px; }
+    .seg button { min-height: 34px; border: 0; border-radius: 7px; background: transparent; color: #cbd5e1; padding: 5px 14px; }
+    .seg button.active { background: #fff; color: #111827; }
+
+    .choices { display: grid; gap: 12px; }
+    .two { grid-template-columns: 1fr 1fr; }
+    .choice {
+      position: relative;
+      min-height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #e2e5ea;
+      border-radius: 16px;
+      background: #fff;
+      font-size: 20px;
+      font-weight: 900;
+      text-align: center;
+    }
+    .choice.row {
+      justify-content: space-between;
+      padding: 16px 18px;
+      min-height: 54px;
+      font-size: 16px;
+      text-align: left;
+    }
+    .choice.selected {
+      border-color: var(--blue);
+      background: var(--blue-soft);
+      color: var(--blue);
+    }
+    .choice.selected::after {
+      content: "✓";
+      position: absolute;
+      right: 14px;
+      top: 14px;
+      display: grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--blue);
+      color: #fff;
+      font-size: 17px;
+    }
+    .choice-card {
+      border: 2px solid #e2e5ea;
+      border-radius: 12px;
+      background: #fff;
+      overflow: hidden;
+    }
+    .choice-card.selected { border-color: var(--blue); background: var(--blue-soft); }
+    .choice-card .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 18px;
+      font-weight: 900;
+    }
+    .choice-card .sub {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 14px 18px;
+      background: rgba(255,255,255,.55);
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid #d9dde5;
+      border-radius: 999px;
+      background: #fff;
+      padding: 8px 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .chip.selected {
+      border-color: var(--blue);
+      background: #eef5ff;
+      color: var(--blue);
+    }
+
+    .ai-box {
+      border: 1px solid #a9cdfd;
+      border-radius: 12px;
+      background: #eff6ff;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+    .ai-box h3 { margin: 0 0 12px; font-size: 14px; }
+    .ai-box .generate {
+      min-height: 36px;
+      margin-bottom: 14px;
+      padding: 7px 13px;
+      border-color: #2563eb;
+      background: #2563eb;
+      color: #fff;
+      font-size: 13px;
+    }
+
+    .body-map {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      background: #fff;
+      padding: 16px 14px 8px;
+      margin: 12px 0 10px;
+      text-align: center;
+    }
+    .image-choice {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-height: 174px;
+      padding: 18px;
+    }
+    .image-crop {
+      width: 158px;
+      height: 112px;
+      margin: 0 auto;
+      overflow: hidden;
+      border-radius: 12px;
+      background: #eef2f7;
+    }
+    .image-crop img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .wide-choice {
+      grid-column: 1 / -1;
+    }
+
+    .body-stage {
+      position: relative;
+      min-height: 356px;
+      overflow: hidden;
+    }
+    .body-stage svg,
+    .body-stage img {
+      width: min(470px, 100%);
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+    .body-note { margin: 8px 0 0; color: #a6adba; font-weight: 800; }
+    .selected-parts {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      border-radius: 12px;
+      background: #fff;
+      padding: 13px;
+      margin-bottom: 10px;
+    }
+    .part-tag {
+      border-radius: 999px;
+      border: 1px solid currentColor;
+      background: color-mix(in srgb, currentColor 12%, white);
+      padding: 7px 12px;
+      font-weight: 900;
+    }
+    .parts-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px 28px;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      background: #f8fafc;
+      padding: 16px;
+    }
+    .part-row { display: flex; align-items: center; gap: 9px; font-weight: 800; }
+    .swatch { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
+    .photo-block {
+      border-radius: 12px;
+      padding: 14px 18px 18px;
+      margin-top: 12px;
+      background: #f6e8f4;
+      border-left: 5px solid #db2777;
+    }
+    .photo-block:nth-child(even) { background: #eee9ff; border-color: #7c3aed; }
+    .photo-actions { display: flex; gap: 12px; margin: 12px 0; }
+    .dash { border-style: dashed; }
+
+    .final-report {
+      border: 1px solid #bfdbfe;
+      border-radius: 16px;
+      background: #eff6ff;
+      padding: 22px;
+      line-height: 1.9;
+    }
+    .report-table {
+      width: 100%;
+      margin-bottom: 18px;
+      border-collapse: collapse;
+      background: #f8fbff;
+    }
+    .report-table th, .report-table td { font-size: 14px; border: 1px solid #dbeafe; padding: 9px 10px; }
+    .report-lead {
+      margin: 4px 0 16px;
+      color: #334155;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+    .final-generate {
+      border: 0;
+      border-radius: 8px;
+      background: #2563eb;
+      color: #fff;
+      font-weight: 800;
+      padding: 12px 18px;
+      margin-bottom: 18px;
+    }
+    .report-section-title {
+      margin: 10px 0 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #111827;
+      font-size: 20px;
+    }
+    .report-table.basic th {
+      width: 28%;
+      color: #475467;
+      background: #f1f5f9;
+      text-align: left;
+    }
+    .report-table.basic td { background: #f8fbff; }
+    .report-body-title { margin: 18px 0 8px; font-size: 18px; }
+    .report-text-box {
+      border: 1px solid #dbeafe;
+      border-radius: 10px;
+      background: #fff;
+      padding: 16px;
+    }
+    .report-text { white-space: pre-wrap; font-size: 16px; }
+    .ai-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 10px 0 14px;
+    }
+    .ai-progress {
+      display: none;
+      min-width: 220px;
+      border: 1px solid #99f6e4;
+      border-radius: 10px;
+      background: #f0fdfa;
+      padding: 10px 12px;
+      color: #0f766e;
+      font-weight: 900;
+    }
+    .ai-progress.active { display: block; }
+    .ai-bar {
+      height: 10px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .ai-bar span {
+      display: block;
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: #5eead4;
+      transition: width .15s linear;
+    }
+    .generate.generating {
+      background: #9db7f5;
+      cursor: progress;
+    }
+    .cancel-generate {
+      border: 1px solid #f87171;
+      color: #ef4444;
+      background: #fff;
+    }
+    .stamp-table {
+      width: 100%;
+      margin-top: 26px;
+      border-collapse: collapse;
+      table-layout: fixed;
+      background: #fff;
+    }
+    .stamp-table th, .stamp-table td {
+      border: 2px solid #2f2f2f;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 13px;
+      font-weight: 900;
+      padding: 9px 6px;
+    }
+    .stamp-table td { height: 42px; }
+    .detail-field { margin: 12px 0 18px; }
+    .detail-field label {
+      display: block;
+      margin-bottom: 8px;
+      color: #2563eb;
+      font-size: 13px;
+      font-weight: 900;
+    }
+    .detail-field input {
+      width: 100%;
+      border: 1px solid #d7dde7;
+      border-radius: 10px;
+      padding: 13px 14px;
+      font-size: 15px;
+      background: #fff;
+    }
+    .inline-check {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .inline-check input { flex: 1; }
+
+    @media (max-width: 900px) {
+      .logo-line { padding-inline: 16px; overflow: auto; }
+      .page { width: min(100vw - 24px, 860px); }
+      th, td { padding: 16px 10px; font-size: 15px; }
+      .toolbar { align-items: flex-start; flex-direction: column; }
+      .two, .parts-list { grid-template-columns: 1fr; }
+      .card-body { padding: 24px 18px; }
+      .card-foot { padding: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="logo-line">
+    <div class="logo"><span class="logo-mark">✓</span>ポチって <span class="role">トップ権限</span></div>
+    <div class="facility"><span>テスト施設</span><span>v0.3.7</span><button class="cache">キャッシュクリア</button></div>
+  </div>
+
+  <section id="listPage" class="page">
+    <div class="toolbar">
+      <h1>事故報告書</h1>
+      <div class="toolbar-actions">
+        <button>使い方ガイド</button>
+        <button>統計</button>
+        <button>管理画面</button>
+        <button>2FA設定</button>
+        <button>ログアウト</button>
+        <button id="newReport" class="teal">＋ 新規作成</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>事故発生日時</th><th>施設名</th><th>利用者名</th><th>事故種別</th><th>第一発見者</th><th>版</th><th>最終更新日</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>2026年7月7日 15:44</td><td>テスト施設</td><td>鈴木一郎</td><td>外傷のみ</td><td>テスト太郎</td><td><span class="pill">v2</span></td><td>2026年7月7日</td>
+            <td><div class="row-actions"><span style="color:#667085">下書き</span><button class="small-btn">編集</button><button class="small-btn ok-btn">対策立案</button><button class="small-btn blue-btn">履歴</button><button class="small-btn red-btn">削除</button></div></td>
+          </tr>
+          <tr>
+            <td>2026年7月7日 15:41</td><td>テスト施設</td><td>鈴木一郎</td><td>外傷のみ</td><td>テスト太郎</td><td><span class="pill">v2</span></td><td>2026年7月7日</td>
+            <td><div class="row-actions"><span style="color:#667085">下書き</span><button class="small-btn">編集</button><button class="small-btn ok-btn">対策立案</button><button class="small-btn blue-btn">履歴</button><button class="small-btn red-btn">削除</button></div></td>
+          </tr>
+          <tr>
+            <td>2026年7月6日 13:23</td><td>テスト施設</td><td>山田太郎</td><td>転倒（転落含む）</td><td>テスト太郎</td><td></td><td>2026年7月6日</td>
+            <td><div class="row-actions"><button class="small-btn teal">PDF出力 / 印刷</button><button class="small-btn yellow-btn">修正</button><button class="small-btn ok-btn">対策立案</button><button class="small-btn red-btn">削除</button></div></td>
+          </tr>
+          <tr>
+            <td>2026年6月25日 14:21</td><td>テスト施設</td><td>山田太郎</td><td>転倒疑い</td><td>岩城一郎</td><td><span class="pill">v2</span></td><td>2026年6月26日</td>
+            <td><div class="row-actions"><span style="color:#667085">下書き</span><button class="small-btn">編集</button><button class="small-btn ok-btn">対策立案</button><button class="small-btn blue-btn">履歴</button><button class="small-btn red-btn">削除</button></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="wizardPage" class="wizard-shell hidden">
+    <p class="facility-label">施設: テスト施設</p>
+    <div class="card">
+      <div class="card-head">
+        <div class="step-row"><span id="sectionName">基本情報</span><span id="counter" class="count">1 / 10</span></div>
+        <div class="bar"><span id="progress"></span></div>
+      </div>
+      <div id="wizardBody" class="card-body"></div>
+      <div class="card-foot">
+        <button id="cancelBtn">キャンセル</button>
+        <div class="foot-right">
+          <button id="backBtn">もどる</button>
+          <button id="draftBtn">下書き保存</button>
+          <button id="nextBtn" class="primary">次へ</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const bodyParts = [
+      ["顔面", "#ec4899"], ["頭", "#ef4444"], ["首", "#c026d3"], ["右肩", "#60a5fa"], ["右腕（うで）", "#38bdf8"],
+      ["右肘（ひじ）", "#22d3ee"], ["右肘から下", "#5eead4"], ["右手", "#84cc16"], ["左肩", "#60a5fa"], ["左腕（うで）", "#06b6d4"],
+      ["左肘（ひじ）", "#22d3ee"], ["左肘から下", "#5eead4"], ["左手", "#84cc16"], ["胸・おなか", "#86efac"], ["背中", "#65a30d"],
+      ["下腹部〜陰部（いんぶ）", "#f97316"], ["臀部", "#fb923c"], ["右太もも", "#8b5cf6"], ["右膝（ひざ）", "#818cf8"],
+      ["右すね〜ふくらはぎ", "#94a3b8"], ["右足首〜つま先", "#a8a29e"], ["左太もも", "#8b5cf6"], ["左膝（ひざ）", "#818cf8"],
+      ["左すね〜ふくらはぎ", "#94a3b8"], ["左足首〜つま先", "#a8a29e"]
+    ];
+
+    const partLayout = {
+      "顔面": [31, 22, 70, 70], "頭": [70, 22, 70, 70], "首": [34, 30, 52, 46],
+      "右肩": [24, 42, 68, 78], "右腕（うで）": [23, 53, 56, 96], "右肘（ひじ）": [24, 59, 48, 70],
+      "右肘から下": [25, 68, 48, 96], "右手": [25, 78, 42, 54], "左肩": [63, 43, 68, 78],
+      "左腕（うで）": [62, 53, 56, 96], "左肘（ひじ）": [62, 60, 48, 70], "左肘から下": [62, 69, 48, 96],
+      "左手": [62, 78, 42, 54], "胸・おなか": [46, 44, 126, 126], "背中": [67, 45, 118, 118],
+      "下腹部〜陰部（いんぶ）": [46, 62, 112, 82], "臀部": [67, 63, 112, 82],
+      "右太もも": [42, 70, 95, 88], "右膝（ひざ）": [42, 80, 72, 58], "右すね〜ふくらはぎ": [42, 88, 74, 92],
+      "右足首〜つま先": [42, 96, 78, 50], "左太もも": [55, 70, 95, 88], "左膝（ひざ）": [55, 80, 72, 58],
+      "左すね〜ふくらはぎ": [55, 88, 74, 92], "左足首〜つま先": [55, 96, 78, 50]
+    };
+
+    const svgPathGroups = {
+      "顔面": [1],
+      "頭": [0, 23],
+      "首": [2],
+      "右肩": [5, 25],
+      "右腕（うで）": [6, 27],
+      "右肘（ひじ）": [9, 29],
+      "右肘から下": [11, 31],
+      "右手": [14, 35],
+      "左肩": [4, 26],
+      "左腕（うで）": [7, 28],
+      "左肘（ひじ）": [8, 30],
+      "左肘から下": [10, 32],
+      "左手": [13, 34],
+      "胸・おなか": [3],
+      "背中": [24],
+      "下腹部〜陰部（いんぶ）": [12],
+      "臀部": [33],
+      "右太もも": [15, 37],
+      "右膝（ひざ）": [17, 39],
+      "右すね〜ふくらはぎ": [19, 41],
+      "右足首〜つま先": [21, 43],
+      "左太もも": [16, 36],
+      "左膝（ひざ）": [18, 38],
+      "左すね〜ふくらはぎ": [20, 40],
+      "左足首〜つま先": [22, 42]
+    };
+
+    const bodySvgBase64 = "PHN2ZyB3aWR0aD0iNDg3IiBoZWlnaHQ9IjQ5NSIgdmlld0JveD0iMCAwIDQ4NyA0OTUiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik05MS44MjQ5IDEuMjY1ODRDODMuMzQyNCAzLjI3ODAzIDc3LjA4MTUgOS4zMTQ2IDc0LjgwOTQgMTcuNTY0NkM3Mi40ODY4IDI1LjgxNDYgNzMuMDkyNyAyNi41NjkxIDgwLjkxODggMjUuMDA5N0M4OS4xOTkzIDIzLjM0OTYgMTA3LjI3NSAyMy4zNDk2IDExNS4xMDEgMjUuMDA5N0MxMjIuMTcgMjYuNTY5MSAxMjIuNDIyIDI2LjMxNzYgMTIwLjk1OCAxOS40MjU5QzExOC4wOCA1Ljc5MzI3IDEwNS40NTcgLTIuMDU0MjggOTEuODI0OSAxLjI2NTg0WiIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIi8+CjxwYXRoIGQ9Ik04NS4xMDk2IDI0LjM1NTRDNzguODQ4OCAyNS4yMTA2IDc0Ljg2IDI2LjE2NjQgNzQuMjAzNiAyNi45NzEyQzczLjg1MDIgMjcuMzIzNCA3My42OTg3IDI4LjczMTkgNzMuODUwMiAzMC4zNDE3Qzc0LjA1MjEgMzIuODU2OSA3NC4wMDE2IDMzLjAwNzggNzMuMTQzMyAzMi41MDQ4QzcyLjQzNjQgMzIuMDAxNyA3Mi4wMzI1IDMyLjE1MjYgNzEuMTIzNyAzMy4wNTgxQzY5LjUwOCAzNC42Njc5IDY5LjYwODkgMzguNTkxNiA3MS4zMjU2IDQxLjk2MjFDNzIuMDMyNSA0My4zMjAzIDcyLjg5MDggNDUuNDMzMSA3My4yNDQzIDQ2LjU5MDFDNzQuMTAyNiA0OS40NTc1IDc1LjQ2NTkgNTAuNjY0OCA3Ni44MjkxIDQ5Ljg1OTlDNzcuNTg2NSA0OS4zNTY5IDc3LjgzODkgNDkuMzU2OSA3Ny45OTA0IDQ5Ljg1OTlDNzguMTQxOSA1MC4yMTIgNzguNTk2MyA1MS44MjE4IDc5LjEwMTIgNTMuNDgxOUM4MC43MTY5IDU4LjgxNDIgODQuMDQ5MyA2Mi41MzY3IDkwLjg2NTYgNjYuNjYxN0M5My44OTUgNjguNDcyNyA5NC4zNDk1IDY4LjYyMzYgOTcuOTM0MyA2OC42MjM2QzEwMS42MiA2OC41NzMzIDEwMS45MjMgNjguNDcyNyAxMDUuODExIDY2LjE1ODdDMTEyLjQyNSA2Mi4xODQ2IDExNS4zNTQgNTguNTEyMyAxMTYuOTY5IDUyLjI3NDVDMTE3LjgyOCA0OC45NTQ0IDExNy45MjkgNDguODUzOCAxMTguNzg3IDQ5LjYwODRDMTE5LjY0NSA1MC40MTMzIDExOS43OTcgNTAuMzYzIDEyMC42NTUgNDkuNDU3NUMxMjEuNzE1IDQ4LjQwMTEgMTIzLjg4NyA0My40MjA5IDEyNS4xNDkgMzkuMjk1OUMxMjYuNDYyIDM0Ljk2OTcgMTI0Ljc0NSAzMC45NDUzIDEyMi4yNzEgMzIuNTA0OEMxMjEuMzYyIDMzLjA1ODEgMTIxLjMxMiAzMi45NTc1IDEyMS41NjQgMzAuMjQxMUMxMjEuODY3IDI2LjcxOTcgMTIxLjcxNSAyNi41MTg1IDExNi45MTkgMjUuNDExOEMxMDguNzM5IDIzLjU1MDUgOTQuNDUwNCAyMy4wNDc1IDg1LjEwOTYgMjQuMzU1NFoiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIvPgo8cGF0aCBkPSJNODMuNDkzOSA2Mi40MzY0QzgzLjE5MSA2Mi43ODg2IDgyLjgzNzUgNjUuNTA1IDgyLjczNjYgNjguNTIzM0M4Mi42MDE5IDcyLjExMTcgODEuODc4MiA3NC40NTkzIDgwLjU2NTUgNzUuNTY2Qzc1LjU2NjkgNzkuNjQwNyA3NS44Njk4IDc5LjE4NzkgNzcuMjgzNiA4MC42OTcxQzc3LjkzOTkgODEuNDAxMyA3OS45MDkxIDgyLjY1ODkgODEuNTc1MyA4My40MTM1QzkyLjUzMTggODguNTk0OSAxMDguNTM3IDg3Ljg0MDMgMTE3LjUyNSA4MS44MDM4QzEyMC43MDYgNzkuNjQwNyAxMjAuNzA2IDc5LjMzODggMTE3LjQyNCA3Ni44NzM5QzExMy43ODggNzQuMTU3NCAxMTMuNTg2IDczLjc1NSAxMTMuMjg0IDY3Ljk3QzExMi45MyA2Mi4xMzQ2IDExMi41MjYgNjEuMzggMTEwLjY1OCA2Mi45ODk4QzEwOS45MDEgNjMuNTkzNCAxMDcuNjI5IDY1LjEwMjYgMTA1LjU1OCA2Ni4zNjAyQzEwMi4wMjQgNjguNTIzMyAxMDEuNjIgNjguNjIzOSA5Ny45ODQ4IDY4LjYyMzlDOTQuMzQ5NSA2OC42MjM5IDkzLjk0NTUgNjguNDczIDkwLjQxMTIgNjYuNDEwNUM4OC4zNDExIDY1LjIwMzIgODYuMDE4NSA2My42NDM3IDg1LjMxMTYgNjIuOTg5OEM4NC4yNTEzIDYyLjAzNCA4My44OTc5IDYxLjkzMzQgODMuNDkzOSA2Mi40MzY0WiIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIi8+CjxwYXRoIGQ9Ik0xMTkuNjQ1IDgwLjI0NDdDMTE4LjAzIDgyLjAwNTQgMTEzLjEzMiA4NC4yNjkxIDEwOC4zMzYgODUuNTI2N0M5Ny44ODM5IDg4LjI5MzUgODIuODg4MSA4NS44Nzg4IDc3LjEzMjIgODAuNTQ2NUM3NS45MjA0IDc5LjM4OTUgNzUuNTY2OSA3OS4yODg5IDc0LjM1NTIgNzkuNzkyQzY3LjAzNCA4Mi42NTkzIDU5LjYxMTggODUuNjc3NiA1OC42MDIgODYuMTgwN0M1Ny43NjA1IDg2LjU4MzEgNTcuMTcxNCA5Mi4wNDk1IDU2LjgzNDggMTAyLjU4QzU2LjE3ODUgMTI1LjExNyA1Ni4yNzk0IDEyOS45OTYgNTcuNTQxNyAxMzYuNzg3QzYxLjU4MSAxNTguMTE2IDYyLjEzNjQgMTY2Ljc2OSA2MC42MjE2IDE4Mi40NjRDNTkuMjU4NCAxOTYuNDQ5IDU4LjkwNSAxOTUuNDkzIDY2LjA3NDcgMTk3LjEwM0M4Ny4xMjkzIDIwMS43ODEgMTEyLjg4IDIwMS42MyAxMzIuMjY4IDE5Ni42NUMxMzcuNTcgMTk1LjI5MiAxMzcuNDE4IDE5NS42OTQgMTM2LjU2IDE4Ni44NDFDMTM0Ljc0MiAxNjcuODc2IDEzNS4wNDUgMTYxLjczOCAxMzguNjgxIDE0MC41MUMxNDAuNyAxMjguOTQgMTQwLjg1MiAxMjUuMzE4IDEzOS45NDMgMTEzLjM5NkMxMzkuNjQgMTA5LjIyIDEzOS4zODcgMTAxLjQyMyAxMzkuNDM4IDk2LjA0MDRDMTM5LjQzOCA4OC4zNDM4IDEzOS4zMzcgODYuMTgwNyAxMzguNzgxIDg1Ljg3ODhDMTM4LjQyOCA4NS42Nzc2IDEzNi40NTkgODUuMDczOSAxMzQuMzg5IDg0LjQ3MDNDMTMyLjMxOSA4My44NjY2IDEyOC40MzEgODIuNDA3OCAxMjUuNzA0IDgxLjIwMDVDMTIyLjQzOSA3OS43NTg0IDEyMC40MiA3OS40Mzk4IDExOS42NDUgODAuMjQ0N1oiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIvPgo8cGF0aCBkPSJNMTM5Ljk5MyA4Ni41ODI4QzEzOC41NzkgODcuOTkxNCAxMzkuNzQxIDEyMy4wNTQgMTQxLjI1NSAxMjQuODE0QzE0MS45NjIgMTI1LjYxOSAxNDIuMTY0IDEyNS42MTkgMTQ0LjM4NiAxMjQuNzY0QzE0NS42NDggMTI0LjI2MSAxNTAuMTQyIDEyMi42NTEgMTU0LjI4MiAxMjEuMTkzQzE2My44MjUgMTE3Ljg3MiAxNjMuMzIgMTE4LjMyNSAxNjIuOTE2IDExMy42NDdDMTYxLjY1NCA5OS43MTI0IDE1Ni4xIDkwLjIwNDggMTQ3LjQ2NiA4Ny4zMzc0QzE0My45MzEgODYuMTgwNCAxNDAuNzUxIDg1LjgyODMgMTM5Ljk5MyA4Ni41ODI4WiIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIi8+CjxwYXRoIGQ9Ik00OS45Njc2IDg3LjQzNzVDNDAuODc5NSA5MC4zNTUxIDM1LjQyNjYgOTkuMzA5MSAzNC4xMTM5IDExMy41NDVDMzMuNjU5NSAxMTguMTIzIDM0LjE2NDQgMTE4Ljc3NyAzOS4xMTIzIDEyMC4yODZDNDEuMDgxNCAxMjAuODg5IDQ1LjQyMzUgMTIyLjM0OCA0OC43MDU0IDEyMy41NTVDNTMuNjAyOSAxMjUuMzY2IDU0Ljg2NTEgMTI1LjYxOCA1NS4zNyAxMjUuMTE1QzU2LjgzNDIgMTIzLjYwNiA1Ny44NDQgODguNDQzNiA1Ni40ODA4IDg3LjA4NTRDNTUuNjIyNCA4Ni4yMzAyIDUzLjI5OTkgODYuMzgxMSA0OS45Njc2IDg3LjQzNzVaIiBzdHJva2U9ImJsYWNrIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiLz4KPHBhdGggZD0iTTM0LjQxNjggMTE5LjMzMUMzNC4xMTM4IDExOS42MzMgMzMuODYxNCAxMjAuNzQgMzMuODYxNCAxMjEuNzQ2QzMzLjg2MTQgMTIyLjc1MiAzMy4zMDYgMTI1LjcyIDMyLjU5OTEgMTI4LjI4NkMyOS43MjExIDEzOC45NSAyNy43NTIgMTQ3LjUwMiAyNi41OTA3IDE1NC4wNDJDMjUuMTc3IDE2Mi4zNDIgMjQuNDE5NiAxNjEuMzM2IDM0LjM2NjMgMTY0LjYwNkM0My44NTg2IDE2Ny43MjUgNDYuNzg3MSAxNjguMzI4IDQ3Ljk5ODggMTY3LjIyMUM0OS42MTQ1IDE2NS43NjMgNTYuMjI4OCAxNDQuODg2IDU2LjkzNTcgMTM4Ljk1QzU3LjMzOTYgMTM1LjMyOCA1Ni4xNzg0IDEyNi45NzggNTUuMTE4IDEyNi4wNzJDNTQuNjYzNiAxMjUuNjcgNTEuMzgxNyAxMjQuMzYyIDQ3Ljc0NjQgMTIzLjEwNEMzNi4xMzM1IDExOS4wMjkgMzUuMDIyNyAxMTguNzI4IDM0LjQxNjggMTE5LjMzMVoiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIvPgo8cGF0aCBkPSJNMTUyLjUxNSAxMjEuNjQ1QzE0MS40MDcgMTI1LjU2OSAxNDEuNDU4IDEyNS41MTggMTQwLjk1MyAxMjYuODc3QzEzOS45NDMgMTI5LjU0MyAxMzkuNzkxIDEzNi41MzUgMTQwLjY1IDE0MC44NjFDMTQxLjc2MSAxNDYuNDQ1IDE0OC4yNzQgMTY1Ljk2MyAxNDkuMzg1IDE2Ny4xMkMxNTAuMjQzIDE2Ny45MjUgMTUwLjU0NiAxNjcuOTI1IDE1NS41NDUgMTY2LjUxN0MxNjEuNzU1IDE2NC43NTYgMTY4LjkyNSAxNjIuMTkgMTcwLjU5MSAxNjEuMTM0QzE3MS42MDEgMTYwLjQ4IDE3MS43MDIgMTYwLjEyOCAxNzEuNDQ5IDE1OC4wMTVDMTcwLjY5MiAxNTIuNDgyIDE2OC4wMTYgMTQwLjQwOSAxNjUuNjQzIDEzMS43NTZDMTY0LjI3OSAxMjYuNjc1IDE2My4xMTggMTIxLjg5NiAxNjMuMTE4IDEyMS4xOTJDMTYzLjExOCAxMTkuODM0IDE2Mi4zMSAxMTguNjc3IDE2MS40MDEgMTE4LjcyN0MxNjEuMDk5IDExOC43MjcgMTU3LjExIDEyMC4wMzUgMTUyLjUxNSAxMjEuNjQ1WiIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIi8+CjxwYXRoIGQ9Ik0xNjUuODk1IDE2Mi45OTZDMTYzLjExOCAxNjQuMDUyIDE1OC41NzQgMTY1LjUxMSAxNTUuNzk3IDE2Ni4yNjVDMTUwLjM5NCAxNjcuNzc0IDE0OS40MzUgMTY4LjIyNyAxNDkuNzM4IDE2OS4xMzNDMTQ5Ljg4OSAxNjkuNDg1IDE1MC4zNDQgMTcyLjA1IDE1MC43NDggMTc0LjkxN0MxNTEuNTA1IDE4MC4xNDkgMTU0LjYzNSAxOTAuODY0IDE1NS42OTYgMTkxLjk3QzE1Ni4zMDIgMTkyLjU3NCAxNzcuNTA3IDE4Ni4xODUgMTc5LjEyMyAxODQuOTc4QzE3OS44OCAxODQuMzc1IDE3Ny41NTggMTc1LjQ3MSAxNzQuNzgxIDE2OC42M0MxNzMuNjIgMTY1Ljg2MyAxNzIuNzExIDE2My4zNDggMTcyLjcxMSAxNjMuMDk2QzE3Mi43MTEgMTYyLjc5NCAxNzIuMzA3IDE2Mi4yNDEgMTcxLjg1MiAxNjEuODM5QzE3MS4wNDUgMTYxLjEzNCAxNzAuNDg5IDE2MS4yMzUgMTY1Ljg5NSAxNjIuOTk2WiIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIi8+CjxwYXRoIGQ9Ik0yNS43MzIyIDE2Mi4yNDFDMjQuMzY5IDE2My44NTEgMTkuNDIxIDE3Ny4zMzIgMTguMjU5OCAxODIuNjE0QzE3LjY1MzkgMTg1LjMzMSAxNy45MDYzIDE4NS40ODIgMzAuNDc4MiAxODkuNTA2QzM3LjgxNjEgMTkxLjg1MyA0MS43MjA2IDE5Mi42NTggNDIuMTkxOCAxOTEuOTJDNDMuNTA0NSAxODkuODU4IDQ1Ljg3NzYgMTgxLjI1NiA0Ni43MzU5IDE3NS41MjFDNDcuMTkwMyAxNzIuMzUyIDQ3LjY5NTIgMTY5LjU4NiA0Ny43OTYyIDE2OS40MzVDNDguMjAwMSAxNjguNzMxIDQ2LjQ4MzQgMTY4LjAyNiA0MC42NzcxIDE2Ni40NjdDMzcuMzQ0OCAxNjUuNTYxIDMyLjc1MDMgMTY0LjEwMyAzMC40NzgyIDE2My4xOTdDMjYuOTQ0IDE2MS43ODkgMjYuMjM3MSAxNjEuNjM4IDI1LjczMjIgMTYyLjI0MVoiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIvPgo8cGF0aCBkPSJNMTY3LjkxNSAxODguNjUxQzE2Mi4xMDggMTkwLjU2MyAxNTcuMDA5IDE5Mi40NzQgMTU2LjYwNSAxOTIuODc3QzE1NS43NDYgMTkzLjczMiAxNTYuNTA0IDE5NS45OTYgMTYxLjcwNCAyMDcuOTY4QzE2My42MjMgMjEyLjM5NSAxNjYuNTUyIDIxOS4yODcgMTY4LjI2OCAyMjMuMzExQzE2OS45MzQgMjI3LjMzNSAxNzEuNjAxIDIzMC45MDcgMTcxLjk1NCAyMzEuMzFDMTcyLjUwOSAyMzEuODYzIDE3My42NzEgMjMxLjY2MiAxNzkuMDczIDIzMC4xMDJDMTg2LjI0MyAyMjguMDQgMTg3LjA1MSAyMjcuNjM3IDE4Ni42NDcgMjI2LjA3OEMxODYuNDk1IDIyNS41MjQgMTg1LjU4NyAyMTkuNTg5IDE4NC41NzcgMjEyLjk5OUMxODEuMjk1IDE5MC45MTUgMTgwLjA4MyAxODQuOTc5IDE3OC44MjEgMTg1LjEzQzE3OC42NjkgMTg1LjEzIDE3My43NzIgMTg2LjczOSAxNjcuOTE1IDE4OC42NTFaIiBzdHJva2U9ImJsYWNrIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiLz4KPHBhdGggZD0iTTE3LjgwNTMgMTg2LjIzNkMxNi45OTc0IDE4Ny4xOTIgMTUuOTg3NiAxOTIuMTIyIDEyLjY1NTIgMjExLjk5MkM5Ljc3NzIxIDIyOS4xNDYgOS43MjY3MiAyMjkuNTk5IDEwLjYzNTYgMjMwLjQwNEMxMi4wOTk4IDIzMS42NjEgMjMuMjU4MyAyMzQuNjI5IDI0LjIxNzYgMjM0LjAyNkMyNC42NzIgMjMzLjcyNCAyNS44ODM4IDIzMS40MSAyNi45NDQxIDIyOC43OTRDMjguMDU0OSAyMjYuMTc4IDMxLjA4NDQgMjE5LjE4NiAzMy43MDk5IDIxMy4yNUM0MC42Nzc2IDE5Ny42MDUgNDIuMDQwOSAxOTQuMDM0IDQxLjIzMyAxOTMuMjI5QzQwLjg3OTYgMTkyLjg3NyAzNi4wMzI1IDE5MS4xMTYgMzAuNTI5IDE4OS40MDVDMjUuMDI1NCAxODcuNjQ1IDIwLjAyNjkgMTg2LjA4NSAxOS40MjEgMTg1Ljg4NEMxOC43NjQ2IDE4NS42ODMgMTguMTA4MiAxODUuODM0IDE3LjgwNTMgMTg2LjIzNloiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIvPgo8cGF0aCBkPSJNMTM1LjU1IDE5NS42NDRDMTM0Ljk0NCAxOTUuODk1IDEzMi4yMTggMTk2LjU0OSAxMjkuNDkxIDE5Ny4xNTNDMTA5LjE5NCAyMDEuNTI5IDg2LjQyMjUgMjAxLjQyOSA2NS45MjMyIDE5Ni45MDFDNTkuMDA2IDE5NS4zNDIgNTkuMzU5NCAxOTUuMDQgNTYuOTM1OCAyMDQuNDQ3QzU0LjI1OTggMjE0Ljg2IDUzLjUwMjQgMjIwLjE0MiA1MS43ODU4IDIzOS40NTlDNTEuNDgyOCAyNDMuNDgzIDUxLjczNTMgMjQzLjc4NSA1Ni44MzQ4IDI0NS40NDVDNjUuMjY2OCAyNDguMTYyIDc1LjIxMzUgMjUyLjQzOCA4Ni42MjQ1IDI1OC4xNzJDOTguMDg1OSAyNjMuOTU3IDk3LjgzMzQgMjYzLjk1NyAxMTEuNjE3IDI1Ny4xNjZDMTIxLjY2NSAyNTIuMjM2IDEzMi4zNjkgMjQ3Ljc1OSAxMzkuNjQgMjQ1LjQ0NUMxNDUuMjk1IDI0My42MzQgMTQ1LjA5MyAyNDQuMTg4IDE0NC4xODQgMjMzLjYyNEMxNDIuOTcyIDIxOS4yODcgMTQyLjA2MyAyMTMuNjAyIDEzOC45ODMgMjAxLjc4MUMxMzcuMzY4IDE5NS40OTMgMTM3LjExNSAxOTUuMDQgMTM1LjU1IDE5NS42NDRaIiBzdHJva2U9ImJsYWNrIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiLz4KPHBhdGggZD0iTTE4NC43NzkgMjI4LjAzOUMxODQuNjc4IDIyOC4xOSAxODIuMDUyIDIyOC45OTUgMTc5LjAyMyAyMjkuODVDMTcxLjY1MSAyMzEuOTYzIDE3MS43NTIgMjMxLjgxMiAxNzMuMTE1IDIzNy4xOTVDMTczLjg1NiAyNDAuMTEzIDE3My44NTYgMjQzLjM0OSAxNzMuMTE1IDI0Ni45MDRDMTcyLjEwNSAyNTIuMDM1IDE3Mi4xMDUgMjUyLjM4NyAxNzIuODYzIDI1Ny43N0MxNzMuMzE3IDI2MC43ODggMTczLjgyMiAyNjUuNjY3IDE3My45NzQgMjY4LjU4NUMxNzQuMzI3IDI3NS4xNzUgMTc1LjEzNSAyNzYuNTMzIDE3Ny41NTkgMjc0LjQ3MUMxNzguOTcyIDI3My4yMTMgMTc5LjAyMyAyNzMuMDYyIDE3OS4yNzUgMjY3LjIyN0MxNzkuNDQ0IDI2My4yNyAxNzkuODk4IDI2MS45NzggMTgwLjYzOCAyNjMuMzUzQzE4Mi4yNTQgMjY2LjM3MiAxODIuNjU4IDI3Mi43MSAxODEuNDk3IDI3Ny44OTFDMTgwLjQzNiAyODIuNzIxIDE4MC40MzYgMjg0LjAyOSAxODEuNDk3IDI4NS4wODVDMTgyLjIwNCAyODUuNzg5IDE4Mi4zNTUgMjg1Ljc4OSAxODMuMzE0IDI4NC45MzRDMTg0LjEyMiAyODQuMjMgMTg0LjI3NCAyODQuMTggMTg0LjA3MiAyODQuNzMzQzE4My45MiAyODUuMTg2IDE4NC4xMjIgMjg1Ljc4OSAxODQuNDc2IDI4Ni4xNDFDMTg1LjU4NyAyODYuOTk3IDE4OC44MTggMjgyLjkyMiAxOTEuMjQyIDI3Ny41MzlDMTkyLjY1NSAyNzQuMzcgMTkzLjQxMyAyNzMuMzE0IDE5My43NjYgMjczLjY2NkMxOTUuMDI4IDI3NC45MjQgMTk1Ljg4NyAyNzIuMDA2IDE5Ni4zNDEgMjY1LjA2NEMxOTYuODk3IDI1Ny40MTcgMTk2LjM5MiAyNTUuNDA1IDE5MS4xOTEgMjQzLjA4MUMxODkuOTI5IDI0MC4wNjIgMTg4Ljg2OCAyMzYuOTQzIDE4OC44NjggMjM2LjA4OEMxODguODY4IDIzNC4zMjggMTg3LjUwNSAyMjkuMzk4IDE4Ni43NDggMjI4LjQ0MkMxODYuMjQzIDIyNy44MzggMTg1LjE4MyAyMjcuNjM3IDE4NC43NzkgMjI4LjAzOVoiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIvPgo8cGF0aCBkPSJNOS4yNzI1NCAyMzEuNzEyQzguODE4MTIgMjMyLjM2NiA4LjM2MzcxIDIzNC4xMjYgOC4yNjI3MyAyMzUuNTM1QzguMTExMjUgMjM3LjE0NSA3LjEwMTQ0IDI0MC4yMTMgNS41ODY3MSAyNDMuNjg0QzAuODQwNTY5IDI1NC41IDAuMTMzNjk3IDI1Ny43NyAwLjYzODYwNiAyNjUuMzE1QzEuMTQzNTEgMjcyLjMwOCAxLjk1MTM3IDI3NC43NzMgMy4zNjUxMSAyNzMuNTY1QzMuOTIwNTEgMjczLjExMiA0LjA3MTk4IDI3My4xNjMgNC4wNzE5OCAyNzMuNzE2QzQuMDcxOTggMjc1LjEyNSA4LjA2MDc2IDI4Mi45MjIgOS44Mjc5NCAyODQuOTM0QzExLjQ0MzYgMjg2Ljc5NSAxMS42NDU2IDI4Ni44NDYgMTIuNTA0IDI4Ni4wOTFDMTMuMDA4OSAyODUuNjg5IDEzLjY2NTIgMjg1LjQzNyAxNC4wMTg3IDI4NS41MzhDMTQuMzIxNiAyODUuNjM4IDE0Ljk3OCAyODUuMTg2IDE1LjQzMjQgMjg0LjUzMkMxNi4xMzkzIDI4My4zNzUgMTYuMTM5MyAyODIuOTIyIDE1LjMzMTQgMjc4Ljc0N0MxNC4xNzAyIDI3My4xNjMgMTQuNDczMSAyNjYuODI0IDE2LjAzODMgMjYzLjgwNkMxNi43NDUyIDI2Mi40OTggMTcuMTQ5MSAyNjMuNzIyIDE3LjI1MDEgMjY3LjQ3OEMxNy40NTIxIDI3Mi44MTEgMTcuNTUzIDI3My4xNjMgMTguODY1OCAyNzQuNDcxQzE5Ljc3NDYgMjc1LjM3NiAyMC41NjU3IDI3NS40OTQgMjEuMjM4OSAyNzQuODIzQzIyLjA5NzIgMjczLjk2OCAyMi4yOTkyIDI3Mi45NjIgMjIuNTUxNiAyNjguMDgyQzIyLjcwMzEgMjY0LjkxMyAyMy4xNTc1IDI2MC4xMzQgMjMuNjExOSAyNTcuNTE4QzI0LjMxODggMjUzLjE0MSAyNC4zMTg4IDI1Mi4yODYgMjMuNDYwNSAyNDcuMDU1QzIyLjY1MjYgMjQxLjcyMiAyMi42NTI2IDI0MS4yNyAyMy40NjA1IDIzOC4zMDJDMjQuNDcwMyAyMzQuNTc5IDI0LjMxODggMjM0LjMyNyAyMC4wNzc2IDIzMy40MjJDMTguNTEyNCAyMzMuMDcgMTUuNTgzOSAyMzIuMjY1IDEzLjYxNDggMjMxLjYxMUMxMS4yNTg1IDIzMC44NCA5LjgxMTExIDIzMC44NzMgOS4yNzI1NCAyMzEuNzEyWiIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIi8+CjxwYXRoIGQ9Ik01MS45ODc3IDI0NC43OTFDNTEuMDc4OSAyNDUuODQ3IDUwLjc3NiAyNzAuMTk1IDUxLjQ4MjggMjgxLjA2QzUyLjY5NDYgMjk4LjY2NyA1NS40NzE2IDMyMS4wNTIgNTYuNTMxOSAzMjEuOTU4QzYwLjg3NCAzMjUuNTI5IDg3LjEyODkgMzI1LjQ3OSA4OC45NDY2IDMyMS45MDdDODkuMTQ4NiAzMjEuNTA1IDg5LjY1MzUgMzE4LjQzNiA5MC4xMDc5IDMxNS4xMTZDOTAuNTExOCAzMTEuNzk2IDkxLjY3MzEgMzAzLjY0NyA5Mi42MzI0IDI5Ny4wMDdDOTQuMzQ5MSAyODUuMjM2IDk1Ljc2MjggMjcyLjU1OSA5Ni4wNjU3IDI2Ni4xMkM5Ni4xNjY3IDI2NC4wMDcgOTQuMjgxNyAyNjEuOTI4IDkwLjQxMDggMjU5Ljg4MkM4MC4xMTA4IDI1NC40NDkgNjMuODAyNSAyNDcuNDU3IDU1LjQ3MTYgMjQ0Ljk0MkM1Mi45NDcgMjQ0LjEzNyA1Mi40OTI2IDI0NC4xMzcgNTEuOTg3NyAyNDQuNzkxWiIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIi8+CjxwYXRoIGQ9Ik0xMzguMTI1IDI0NS44OThDMTI4LjQ4MSAyNDkuMjE4IDEyMi4wMTggMjUxLjk4NSAxMTEuMDEyIDI1Ny40NjhMMTAwLjI1NyAyNjIuODAxTDEwMC4zNTggMjY3LjgzMUMxMDAuNjExIDI3Ny4yODggMTA2LjQ2NyAzMjEuMDUzIDEwNy42NzkgMzIyLjI2QzExMC4wMDIgMzI0LjU3NCAxMjYuODE1IDMyNS40OCAxMzQuNTkgMzIzLjcxOUMxNDAuMTk1IDMyMi40NjEgMTQwLjcgMzIyLjEwOSAxNDEuMDUzIDMxOC41MzhDMTQxLjI1NSAzMTYuOTI4IDE0Mi4wNjMgMzA5LjczNCAxNDIuODcxIDMwMi41NDFDMTQ1LjA0MiAyODMuNjc3IDE0NS41OTcgMjczLjUxNSAxNDUuMzQ1IDI1OC41NzVDMTQ1LjE5MyAyNDcuODEgMTQ1LjA0MiAyNDUuMjk1IDE0NC40MzYgMjQ0LjY5MUMxNDMuNzI5IDI0NC4wMzcgMTQzLjAyMiAyNDQuMTg4IDEzOC4xMjUgMjQ1Ljg5OFoiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIvPgo8cGF0aCBkPSJNNTYuNjMyOSAzMjMuMDY1QzU2LjI3OTQgMzIzLjQxNyA1Ni4wNzc1IDMyOC40NDggNTYuMDc3NSAzMzguNTA4QzU2LjA3NzUgMzU1LjcxMiA1NS43NzQ1IDM1NC42MDUgNjEuMTI2NCAzNTUuODEzQzcwLjAxMjYgMzU3Ljc3NSA4My45OTgyIDM1Ni44MTkgODUuNDExOSAzNTQuMTAyQzg3LjEyODUgMzUwLjgzMyA4OS41MDE2IDMyNC44NzYgODguMTg4OCAzMjMuNTY4Qzg3LjczNDQgMzIzLjA2NSA4Ni44NzYxIDMyMy4wNjUgODQuMDk5MiAzMjMuNjY5Qzc2LjQ3NTMgMzI1LjI3OSA2Ni45ODMyIDMyNS4wNzcgNTkuNzYzMiAzMjMuMjE2QzU3Ljg5NTEgMzIyLjcxMyA1Ny4wMzY4IDMyMi42NjMgNTYuNjMyOSAzMjMuMDY1WiIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIi8+CjxwYXRoIGQ9Ik0xMDcuNjI5IDMyMy4xMTZDMTA2LjQ2NyAzMjQuNTc1IDEwOS4xOTQgMzUyLjU0MyAxMTAuNzA5IDM1NC40NTVDMTEyLjQyNSAzNTYuNjE4IDEyNy40NzEgMzU3LjUyMyAxMzQuODQzIDM1NS45MTRDMTQwLjU0OCAzNTQuNjU2IDE0MC4xNDQgMzU1Ljk2NCAxNDAuMDkzIDMzOC42MDlDMTQwLjA0MyAzMzAuMzYgMTM5Ljg5MSAzMjMuMzE3IDEzOS42OSAzMjMuMDE1QzEzOS40ODggMzIyLjY2MyAxMzguNTc5IDMyMi43MTMgMTM2Ljc2MSAzMjMuMTY2QzEyOS4yODkgMzI1LjE3OCAxMTguNzM2IDMyNS4yNzkgMTExLjU2NyAzMjMuNDY4QzEwOS4wOTMgMzIyLjg2NCAxMDcuOTMyIDMyMi43NjQgMTA3LjYyOSAzMjMuMTE2WiIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIi8+CjxwYXRoIGQ9Ik01Ni4yMjg5IDM1NS4yMUM1NS4yMTkgMzU2LjM2NyA1NC40MTEyIDM3MC4zMDEgNTQuNzE0MSAzODAuMjExQzU0Ljg2NTYgMzg1Ljg0NSA1NS43NzQ0IDM5Ny4wMTMgNTcuMDM2NyA0MDguMThDNTguMTQ3NSA0MTguMzkyIDU5LjIwNzggNDI4LjY1NCA1OS40MDk3IDQzMC45MThDNTkuNjExNyA0MzMuNzg1IDYwLjAxNTYgNDM1LjI5NCA2MC41NzEgNDM1Ljc5N0M2MS45ODQ3IDQzNy4xMDUgNjguMjk2IDQzNy44MDkgNzIuNjg4NyA0MzcuMTU1Qzc4LjU0NTUgNDM2LjI1IDc4LjU5NiA0MzYuMjUgNzkgNDI5LjE1N0M3OS40MDM5IDQyMS4zNiA4MS4wMTk2IDQwOC4wOCA4Mi42MzUzIDM5OC42MjJDODMuMzQyMSAzOTQuNDQ3IDg0LjMwMTQgMzg4LjkxNCA4NC43NTU5IDM4Ni4yOThDODUuODE2MSAzNzkuODA5IDg1Ljg2NjYgMzU2LjkyIDg0LjgwNjMgMzU1LjgxNEM4NC4xNSAzNTUuMjEgODMuNTk0NiAzNTUuMjEgODAuNTY1MiAzNTUuODY0Qzc0LjMwNDQgMzU3LjE3MiA2NC4yNTY4IDM1Ni43MTkgNTcuNzk0MSAzNTQuODU4QzU3LjE4ODIgMzU0LjY1NyA1Ni41MzE4IDM1NC44MDcgNTYuMjI4OSAzNTUuMjFaIiBzdHJva2U9ImJsYWNrIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiLz4KPHBhdGggZD0iTTEzNi4xMDUgMzU1LjQ2MkMxMzIuMTY3IDM1Ni42MTkgMTIwLjMwMiAzNTYuODcxIDExNS42NTcgMzU1LjkxNUMxMTAuMDUyIDM1NC43MDcgMTEwLjM1NSAzNTMuOTUzIDExMC4zNTUgMzY5Ljg0OUMxMTAuNDA2IDM4Mi45NzggMTEwLjQwNiAzODMuMDc5IDExMi41MjYgMzk1LjYwNUMxMTQuNzk4IDQwOS4xMzcgMTE1Ljg1OSA0MTcuMzg3IDExNi42NjYgNDI4LjA1MUMxMTcuMDcgNDMzLjQ4NCAxMTcuMzIzIDQzNC45OTMgMTE4LjA4IDQzNS43NDhDMTE5LjU5NSA0MzcuMjA2IDEyNS40NTIgNDM3LjkxMSAxMzAuMTQ3IDQzNy4yMDZDMTM1LjQ5OSA0MzYuMzUxIDEzNi4xMDUgNDM1LjY5NyAxMzYuNTA5IDQzMC40MTVDMTM2LjcxMSA0MjguMTUyIDEzNy43NzEgNDE4LjQ5MyAxMzguODgyIDQwOC45MzVDMTQxLjcxIDM4NC40MzcgMTQyLjA2MyAzNzguNDUxIDE0MS4zNTYgMzY2LjY4QzE0MS4wMDMgMzU5Ljc4OCAxNDAuNTk5IDM1Ni41MTggMTQwLjA5NCAzNTUuNzE0QzEzOS4yMzYgMzU0LjQ1NiAxMzkuNDM4IDM1NC40NTYgMTM2LjEwNSAzNTUuNDYyWiIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIi8+CjxwYXRoIGQ9Ik02MC4zMTg3IDQzNi43MDRDNjAuMDY2MiA0MzcuMDU2IDU5Ljk2NTIgNDM4LjcxNiA2MC4wMTU3IDQ0MC4zNzZDNjAuMTE2NyA0NDIuMDM2IDU5LjgxMzggNDQ1LjU1NyA1OS40MDk4IDQ0OC4xNzNDNTguOTU1NCA0NTAuNzg5IDU4LjYwMiA0NTMuOTA4IDU4LjYwMiA0NTUuMDY1QzU4LjYwMiA0NTguNjM3IDUzLjY1MzkgNDY1LjYyOSA0My4zMDMyIDQ3Ni43OTdDMzkuMTEyNSA0ODEuMzI0IDM3LjY5ODggNDg0LjE5MSAzOC45MTA1IDQ4NS42NUMzOS4yNjQgNDg2LjA1MyAzOS43Njg5IDQ4Ni4yNTQgNDAuMDcxOCA0ODYuMDUzQzQwLjM3NDggNDg1Ljg1MSA0MC40NzU4IDQ4Ni4yMDQgNDAuMjczOCA0ODcuMDA5QzM5LjkyMDQgNDg4LjI2NiA0MS41MzYxIDQ5MC40OCA0Mi4yNDI5IDQ4OS43NzVDNDIuNDQ0OSA0ODkuNjI0IDQzLjAwMDMgNDg5Ljk3NiA0My41MDUyIDQ5MC41OEM0NC4yMTIxIDQ5MS40ODYgNDQuNTY1NSA0OTEuNTg2IDQ1LjMyMjkgNDkxLjEzM0M0Ni4wMjk4IDQ5MC42ODEgNDYuMzgzMiA0OTAuODMyIDQ3LjE0MDUgNDkxLjc4N0M0OC4yMDA5IDQ5My4xNDYgNDkuMTA5NyA0OTMuMjQ2IDUwLjAxODUgNDkyLjE5QzUwLjYyNDQgNDkxLjQ4NiA1MC43NzU5IDQ5MS41MzYgNTEuNzg1NyA0OTIuNDQxQzUyLjU0MzEgNDkzLjE0NiA1My41NTI5IDQ5My40NDggNTUuMzIwMSA0OTMuNDQ4QzU3LjU0MTcgNDkzLjQ0OCA1Ny45NDU2IDQ5My4yNDYgNTkuOTY1MiA0OTEuMTg0QzYxLjEyNjUgNDg5LjkyNiA2Mi4zMzgzIDQ4OC45MiA2Mi42NDEyIDQ4OC45MkM2NC4wNTUgNDg4LjkyIDY3LjU4OTMgNDg0Ljc0NSA2OC42NDk3IDQ4MS45MjhDNjkuOTYyNCA0NzguMjU1IDcxLjI3NTIgNDc2LjU5NSA3My42OTg3IDQ3NS4zMzhDNzYuNDI1MiA0NzMuOTggNzguNjQ2OCA0NzEuMjYzIDc5LjA1MDggNDY4Ljc5OEM3OS41MDUyIDQ2Ni4yMzMgNzguOTQ5OCA0NjEuMzAzIDc3Ljk5MDUgNDU5LjQ5MkM3Ny40ODU2IDQ1OC40MzUgNzcuMzg0NiA0NTcuNjMgNzcuNzM4IDQ1Ni4yNzJDNzguNDk1NCA0NTMuNTU2IDc4LjM0MzkgNDM3LjI1NyA3Ny41ODY1IDQzNi42NTNDNzcuMTgyNiA0MzYuMzUyIDc2LjIyMzMgNDM2LjM1MiA3NC43NTkxIDQzNi42NTNDNzIuNDM2NSA0MzcuMjA3IDYzLjA0NTIgNDM3LjAwNiA2MS41ODA5IDQzNi40MDJDNjEuMDc2IDQzNi4yMDEgNjAuNTcxMSA0MzYuMzAxIDYwLjMxODcgNDM2LjcwNFoiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIvPgo8cGF0aCBkPSJNMTE3Ljg3OCA0MzYuNzA0QzExNy4zMjMgNDM3LjYwOSAxMTcuMTcxIDQ1My4wNTMgMTE3LjcyNyA0NTUuNjY5QzExOC4wMyA0NTcuMDI3IDExOC4wMyA0NTguMDgzIDExNy43MjcgNDU4LjQzNUMxMTYuODY4IDQ1OS40NDEgMTE2LjIxMiA0NjYuMzg0IDExNi43MTcgNDY4Ljk5OUMxMTcuMjIyIDQ3MS44MTYgMTE4LjI4MiA0NzMuMTc1IDEyMS44MTcgNDc1LjQzOEMxMjQuMzkyIDQ3Ny4wNDggMTI1LjA5OSA0NzguMDU0IDEyNi43NjUgNDgyLjUzMUMxMjcuODI1IDQ4NS4zNDggMTMxLjA1NiA0ODguOTIgMTMyLjU3MSA0ODguOTJDMTMyLjk3NSA0ODguOTIgMTMzLjgzMyA0ODkuNjI0IDEzNC40MzkgNDkwLjQ4QzEzNi43MTEgNDkzLjU0OCAxNDAuOTUzIDQ5NC41MDQgMTQzLjEyNCA0OTIuNDkyQzE0NC4xMzQgNDkxLjUzNiAxNDQuMzM2IDQ5MS40ODYgMTQ0Ljk0MSA0OTIuMTlDMTQ1LjggNDkzLjI0NiAxNDcuMTEzIDQ5My4xNDYgMTQ4LjIyMyA0OTEuOTM4QzE0OC45MyA0OTEuMTg0IDE0OS4yODQgNDkxLjA4MyAxNDkuODM5IDQ5MS40ODZDMTUwLjM0NCA0OTEuOTM4IDE1MC43NDggNDkxLjgzOCAxNTEuNTU2IDQ5MS4xMzNDMTUyLjExMSA0OTAuNjMgMTUyLjkxOSA0OTAuMTc4IDE1My4zMjMgNDkwLjEyN0MxNTQuODg4IDQ4OS44NzYgMTU1LjU5NSA0ODguODE5IDE1NS4yNDIgNDg3LjI2QzE1NS4wNCA0ODYuMzU1IDE1NS4xNDEgNDg1LjkwMiAxNTUuNDQ0IDQ4Ni4xMDNDMTU2LjMwMiA0ODYuNjA2IDE1Ny4xNiA0ODUuMDQ3IDE1Ni44NTcgNDgzLjUzN0MxNTYuNTA0IDQ4MS45MjggMTU0LjYzNiA0NzkuNTEzIDE0OC44MjkgNDcyLjk3M0MxNDYuNzA5IDQ3MC41NTkgMTQzLjE3NCA0NjUuOTgxIDE0MS4wMDMgNDYyLjg2MkMxMzYuNjYxIDQ1Ni40MjMgMTM2LjkxMyA0NTcuNTggMTM2LjA1NSA0NDIuNzkxQzEzNS43MDIgNDM2LjMwMSAxMzUuNDQ5IDQzNS45NDkgMTMyLjMxOSA0MzYuNjUzQzEyOS45NDYgNDM3LjIwNyAxMjAuNTU0IDQzNy4wMDYgMTE5LjE0MSA0MzYuNDAyQzExOC42MzYgNDM2LjIwMSAxMTguMTMxIDQzNi4zMDEgMTE3Ljg3OCA0MzYuNzA0WiIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIi8+CjxwYXRoIGQ9Ik0zNzkuNTExIDAuOTYzNjM2QzM3Ni4yNzkgMS43Njg1IDM3Mi40OTMgMy45ODE4OSAzNjkuNTY0IDYuNzk4OTJDMzY0LjI2MyAxMS44MjkzIDM2Mi4yOTQgMTcuMTExMyAzNjIuMjk0IDI2LjE2NkMzNjIuMjk0IDMxLjU5ODkgMzYyLjI0MyAzMi4wMDEzIDM2MS4zODUgMzEuNzQ5OEMzNjAuODggMzEuNjQ5MiAzNTkuOTcxIDMxLjk1MSAzNTkuNDY2IDMyLjQwMzhDMzU3LjggMzMuOTEyOSAzNTguMTUzIDM3LjIzMyAzNjAuNDc2IDQyLjIxMzFDMzYxLjU4NyA0NC41Nzc0IDM2Mi40OTYgNDYuODQxIDM2Mi40OTYgNDcuMjkzOEMzNjIuNDk2IDQ4LjcwMjMgMzY0LjQxNCA1MC4wNjA1IDM2NS40NzUgNDkuNDA2NkMzNjYuMzMzIDQ4Ljg1MzIgMzY2LjQ4NCA0OS4xMDQ3IDM2Ny4yNDIgNTIuMDcyN0MzNjcuNjk2IDUzLjg4MzYgMzY4LjQ1MyA1NS45NDYxIDM2OC45NTggNTYuNzAwN0MzNzAuOTc4IDU5Ljc2OTIgMzY5Ljg2NyA2OS45ODEgMzY3LjI0MiA3Mi44OTg2QzM2NS4wNzEgNzUuMzEzMiAzNjUuMzc0IDc1LjU2NDcgMzcxLjU4NCA3Ni43MjE3QzM4MS4yNzggNzguNTMyNyA0MDMuNTQ0IDc3LjUyNjYgNDA1LjkxNyA3NS4xMTJDNDA2LjU3NCA3NC40NTggNDA2LjQ3MyA3NC4yMDY1IDQwNC44MDYgNzIuNjk3NEM0MDIuNTM0IDcwLjYzNDkgNDAyLjEzIDY4LjkyNDYgNDAyLjEzIDYyLjAzMjlDNDAyLjEzIDU3Ljk1ODMgNDAyLjI4MiA1Ni43MDA3IDQwMi45ODkgNTUuOTk2NEM0MDMuNDQzIDU1LjQ0MzEgNDA0LjA0OSA1NC4wMzQ1IDQwNC40MDIgNTIuNzc2OUM0MDUuNDYzIDQ4LjUwMTEgNDA1LjQxMiA0OC42NTIgNDA2LjI3MSA0OS4zNTYzQzQwNy4xMjkgNTAuMDEwMiA0MDkuNDUyIDQ3Ljk0NzcgNDA5LjQ1MiA0Ni40ODg5QzQwOS40NTIgNDYuMTM2OCA0MTAuMjU5IDQ0LjEyNDYgNDExLjI2OSA0Mi4wNjIyQzQxMy40NCAzNy40MzQyIDQxMy43OTQgMzMuNzExNyA0MTIuMDc3IDMyLjA1MTZDNDExLjA2NyAzMC45OTUyIDQxMC45NjYgMzAuOTk1MiA0MTAuMDU3IDMxLjgwMDFDNDA5LjA5OCAzMi42NTUzIDQwOS4wOTggMzIuNjA1IDQwOS41NTIgMjkuNzg3OUM0MTEuNDcxIDE4LjIxOCA0MDUuODE2IDYuODk5NTMgMzk1LjkyIDIuMzcyMTVDMzkyLjIzNCAwLjY2MTgxMSAzODMuNzAxIC0wLjA0MjQ0NzMgMzc5LjUxMSAwLjk2MzYzNloiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIvPgo8cGF0aCBkPSJNMzU4LjcwOSA3OC4yMzE4QzM1NS4zNzYgNzkuOTkyNCAzNTAuOTMzIDgyLjA1NDkgMzQ4Ljg2MyA4Mi43NTkyQzM0Mi44NTUgODQuOTIyMyAzNDMuMTU4IDg0LjAxNjggMzQzLjg2NSA5Ni40NDIxQzM0NC4zMTkgMTA0Ljk5NCAzNDQuMzE5IDEwOC45MTggMzQzLjc2NCAxMTYuMDYxQzM0Mi45NTYgMTI2Ljk3NyAzNDMuMTA3IDEzMi4wMDggMzQ0LjM2OSAxNDAuODExQzM0Ny4wOTYgMTU5LjQ3NCAzNDcuNDQ5IDE2OS4zMzQgMzQ1LjgzNCAxODMuODIyQzM0NC43NzMgMTkzLjY4MSAzNDQuNjcyIDE5My4zNzkgMzQ5LjE2NiAxOTQuNDM2QzM3MC4yNzEgMTk5LjQxNiAzOTQuMzU1IDE5OS42MTcgNDE4Ljc5MyAxOTUuMDM5QzQyNi41NjkgMTkzLjU4MSA0MjYuMTY1IDE5NC40MzYgNDI1LjAwMyAxODIuMzEyQzQyMy41OSAxNjcuNTczIDQyMy45NDMgMTYwLjgzMiA0MjcuMzc2IDEzOS4yMDFDNDI4LjMxOSAxMzMuMjk5IDQyOC41NzEgMTI1LjkzNyA0MjguMTM0IDExNy4xMTdDNDI3LjYyOSAxMDYuODA1IDQyNy42MjkgMTAxLjc3NCA0MjguMDgzIDk0LjU4MDhDNDI4LjQzNyA4OC4yOTI3IDQyOC40ODcgODUuMTIzNSA0MjguMTM0IDg0LjcyMTFDNDI3LjgzMSA4NC4zNjkgNDI2LjIxNSA4My42MTQ0IDQyNC40NDggODIuOTYwNEM0MjIuNzMxIDgyLjM1NjggNDE4LjI4OCA4MC4yOTQzIDQxNC42MDIgNzguMzgyN0M0MTAuMTI1IDc2LjEwMjIgNDA2LjMzOSA3NS4yODA2IDQwMy4yNDIgNzUuOTE3OEMzOTYuNDc2IDc3LjMyNjMgMzg3LjY5MSA3OC4wMzA2IDM4MS45MzUgNzcuNjc4NEMzNzcuMzQgNzcuMzc2NiAzNjcuMzQzIDc1LjkxNzggMzY1LjUyNSA3NS4yNjM4QzM2NS4xMjEgNzUuMTEyOSAzNjIuMDQxIDc2LjQyMDggMzU4LjcwOSA3OC4yMzE4WiIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIi8+CjxwYXRoIGQ9Ik00MjkuMTQ0IDg1LjI3NUM0MjcuMTc0IDg3LjU4OSA0MjcuMjI1IDEyMi42NTEgNDI5LjE0NCAxMjQuOTY1QzQyOS44IDEyNS43NyA0MzEuODIgMTI1LjIxNyA0NDIuOTc4IDEyMS4xNDJDNDUzLjE3NyAxMTcuNDIgNDUyLjc3MyAxMTcuNzcyIDQ1Mi4yNjggMTEyLjU0QzQ1MS40NiAxMDQuMzkxIDQ0OC40MzEgOTUuNTg3NSA0NDQuOTk4IDkxLjU2MzFDNDQyLjY3NSA4OC43OTY0IDQzOC4wOCA4Ni4xMzAyIDQzNC4xOTMgODUuMjc1QzQzMS4zMzEgODQuNjA0MyA0MjkuNjQ4IDg0LjYwNDMgNDI5LjE0NCA4NS4yNzVaIiBzdHJva2U9ImJsYWNrIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiLz4KPHBhdGggZD0iTTMzNi43NDUgODUuOTI4NUMzMjguMDEgODguNjk1MyAzMjIuODYgOTYuMDM5OCAzMjAuMzM2IDEwOS4yN0MzMTguNzcxIDExNy42MjEgMzE4LjY3IDExNy40NyAzMjcuODU5IDEyMC45NDFDMzM3LjQwMiAxMjQuNTYzIDM0MS44OTUgMTI1LjgyIDM0Mi42NTMgMTI1LjA2NkMzNDQuNjcyIDEyMy4wNTMgMzQ0Ljc3MyA4OC4wOTE2IDM0Mi43NTQgODUuNjc3QzM0MS45OTYgODQuNzcxNSAzNDAuMTI4IDg0LjgyMTggMzM2Ljc0NSA4NS45Mjg1WiIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIi8+CjxwYXRoIGQ9Ik00NDcuODc2IDExOS4yM0M0NDUuODU2IDExOS45ODQgNDQwLjk1OSAxMjEuNjk1IDQzNy4wMiAxMjMuMDAzQzQzMy4xMzIgMTI0LjMxMSA0MjkuNTk4IDEyNS41NjggNDI5LjI5NSAxMjUuODdDNDI3Ljk4MiAxMjYuODc2IDQyOC40ODcgMTM0LjAxOSA0MzAuNDA2IDE0MS41NjVDNDMyLjQyNiAxNDkuNTEzIDQzNy45OCAxNjYuNDE2IDQzOC44ODggMTY3LjMyMUM0NDAuMDUgMTY4LjUyOSA0NjAuNDk5IDE2Mi4zOTEgNDYxLjY2IDE2MC41M0M0NjIuMTE0IDE1OS43NzYgNDU4LjYzIDE0Mi44MjMgNDU1LjcwMiAxMzEuNjU1QzQ1NC4xMzcgMTI1LjY2OSA0NTIuODc0IDEyMC4yODYgNDUyLjg3NCAxMTkuNzgzQzQ1Mi44NzQgMTE3LjgyMSA0NTEuODE0IDExNy43MjEgNDQ3Ljg3NiAxMTkuMjNaIiBzdHJva2U9ImJsYWNrIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiLz4KPHBhdGggZD0iTTMxOS42NzkgMTE4Ljc3OEMzMTkuMzI2IDExOS4xMyAzMTkuMDc0IDExOS45MzUgMzE5LjA3NCAxMjAuNTg5QzMxOS4wNzQgMTIxLjI0MyAzMTcuODExIDEyNi41MjUgMzE2LjI5NyAxMzIuNDFDMzE0Ljc4MiAxMzguMjk2IDMxMi44NjMgMTQ2Ljg5OCAzMTEuOTU0IDE1MS42MjdDMzEwLjkxMSAxNTcuMjk0IDMxMC44MSAxNjAuNDk3IDMxMS42NTEgMTYxLjIzNUMzMTQuNTggMTYzLjc1IDMzMS42NDYgMTY4LjczIDMzMi45NTkgMTY3LjQyMkMzMzQuMDE5IDE2Ni4zMTYgMzQwLjUzMiAxNDcuODA0IDM0Mi44NTUgMTM5LjMwMkMzNDMuMTU4IDEzOC4wNDQgMzQzLjQxIDEzNC43NzUgMzQzLjM2IDEzMi4wMDhDMzQzLjI1OSAxMjYuNDc0IDM0Mi44MDQgMTI1LjUxOSAzNDAuMDc4IDEyNC45NjVDMzM5LjIxOSAxMjQuNzY0IDMzNC40NzMgMTIzLjE1NCAzMjkuNTc2IDEyMS4zOTRDMzE5LjM3NyAxMTcuNzIxIDMyMC40MzcgMTE4LjAyMyAzMTkuNjc5IDExOC43NzhaIiBzdHJva2U9ImJsYWNrIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiLz4KPHBhdGggZD0iTTQ1Ni42MSAxNjIuNzQ0QzQ1NC4zMzggMTYzLjcgNDQ5LjY5MyAxNjUuMjA5IDQ0Ni4zNjEgMTY2LjExNEM0NDIuOTc4IDE2Ny4wMiA0MzkuOTk5IDE2OC4wMjYgNDM5LjY5NiAxNjguMzI4QzQzOC40ODQgMTY5LjUzNSA0NDMuNjM0IDE5MC41MTEgNDQ1LjU1MyAxOTIuMTIxQzQ0Ni4yMDkgMTkyLjY3NCA0NDcuOTc3IDE5Mi4yMjIgNDU1LjQ5OSAxODkuOTA4QzQ2Ny45MiAxODUuOTg0IDQ2OS4zMzQgMTg1LjMzIDQ2OS4xMzIgMTgzLjE2N0M0NjguOTggMTgxLjA1NCA0NjIuNzcgMTYyLjg0NCA0NjEuODExIDE2MS41MzdDNDYxLjIwNSAxNjAuNzgyIDQ2MS41MDggMTYwLjczMiA0NTYuNjEgMTYyLjc0NFoiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIvPgo8cGF0aCBkPSJNMzEwLjM4OSAxNjIuMjkxQzMwOS40MyAxNjMuNDQ4IDMwNS45NDYgMTcyLjQwMiAzMDMuOTI2IDE3OC45OTJDMzAxLjkwNyAxODUuNDgxIDMwMS43MDUgMTg1LjIyOSAzMTAuOTk1IDE4OC4yNDhDMzIyLjY1OCAxOTIuMDcxIDMyNS42MzcgMTkyLjgyNSAzMjYuNDQ1IDE5Mi4wMkMzMjguNjE2IDE4OS44NTcgMzMzLjM2MiAxNzAuMTM4IDMzMi4wOTkgMTY4LjYyOUMzMzEuNzk2IDE2OC4yNzcgMzMwLjYzNSAxNjcuNzI0IDMyOS40NzQgMTY3LjQ3MkMzMjUuNTM2IDE2Ni40NjYgMzE3LjMwNiAxNjMuODUgMzE0LjQyOCAxNjIuNjQzQzMxMC45OTUgMTYxLjE4NCAzMTEuMzQ4IDE2MS4yMzUgMzEwLjM4OSAxNjIuMjkxWiIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIi8+CjxwYXRoIGQ9Ik00NjQuNzQgMTg2LjY4OUM0NjIuNTE4IDE4Ny40OTMgNDU3LjUxOSAxODkuMTU0IDQ1My42MzIgMTkwLjM2MUM0NDkuNzQ0IDE5MS41NjggNDQ2LjM2MSAxOTIuODc2IDQ0Ni4xMDggMTkzLjI3OUM0NDUuNTUzIDE5NC4xMzQgNDQ2LjUxMiAxOTYuNjk5IDQ1NC42OTIgMjE1LjgxNUM0NTcuODIyIDIyMy4yMSA0NjAuNTQ5IDIyOS44IDQ2MC43IDIzMC41MDRDNDYxLjQwNyAyMzMuMjcxIDQ2Mi4yNjUgMjMzLjQ3MiA0NjcuNDE2IDIzMi4xMTRDNDcyLjg2OSAyMzAuNjU1IDQ3NS4wOSAyMjkuOCA0NzUuOTQ5IDIyOC43NDNDNDc2Ljk1OCAyMjcuNTM2IDQ3MC43NDggMTg2Ljk5IDQ2OS4zODUgMTg1Ljc4M0M0NjguOTMgMTg1LjM4MSA0NjcuNjY4IDE4NS42MzIgNDY0Ljc0IDE4Ni42ODlaIiBzdHJva2U9ImJsYWNrIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiLz4KPHBhdGggZD0iTTMwMi4yMSAxODYuNjg5QzMwMS4zNTEgMTg3Ljk5NyAyOTkuODM2IDE5Ni4wNDYgMjk2LjgwNyAyMTQuOTZDMjk0LjMzMyAyMzAuNzA2IDI5My42NzcgMjI5LjI5NyAzMDQuNzg1IDIzMi4zMTVDMzA5LjE3NyAyMzMuNDcyIDMwOS4wNzYgMjMzLjU3MyAzMTEuNjUxIDIyNy4zMzVDMzEyLjYxMSAyMjQuOTcxIDMxNS43OTIgMjE3LjgyOCAzMTguNjcgMjExLjQ4OUMzMjYuMzQ0IDE5NC42ODcgMzI2LjQ0NSAxOTQuMzM1IDMyNS40MzUgMTkzLjE3OEMzMjQuOTMgMTkyLjYyNSAzMjMuOTIxIDE5Mi4wNzIgMzIzLjIxNCAxOTEuODdDMzIxLjkwMSAxOTEuNTY5IDMwNS4xODkgMTg2LjMzNyAzMDMuNzI0IDE4NS43ODRDMzAzLjMyIDE4NS42MzMgMzAyLjY2NCAxODUuOTg1IDMwMi4yMSAxODYuNjg5WiIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIi8+CjxwYXRoIGQ9Ik0zNDUuMjI4IDE5NC40ODdDMzQ0LjM2OSAxOTUuNDkzIDM0MS4yMzkgMjA2Ljg2MiAzNDAuMDc4IDIxMy4wNDlDMzM5LjIxOSAyMTcuNzc4IDMzOC4wMDggMjI4LjQ0MiAzMzcuMiAyMzkuMzA4QzMzNi44MjkgMjQ0LjQ3MyAzMzcuMjY3IDI0Ny42OTIgMzM4LjUxMiAyNDguOTY3QzM1MS42NCAyNjIuMzQ4IDM3Ny44OTUgMjY4Ljk4OCAzODMuOTA0IDI2MC40MzZDMzg0LjQwOSAyNTkuNzY2IDM4NS40NTIgMjYwLjEwMSAzODcuMDM0IDI2MS40NDJDMzg4LjM0NyAyNjIuNTk5IDM5MC4wNjQgMjYzLjY1NiAzOTAuOTcyIDI2My43NTZDMzk1LjgyIDI2NC41MTEgMzk3LjY4OCAyNjQuNTYxIDQwMS40NzUgMjY0LjA1OEM0MTEuOTI2IDI2Mi42NSA0MjQuMTQ1IDI1Ni41MTIgNDMxLjM2NSAyNDkuMDY3QzQzMi42NzggMjQ3LjY5MiA0MzMuMTMyIDI0My42MDEgNDMyLjcyOCAyMzYuNzkzQzQzMS43MTkgMjIwLjM0MyA0MjkuOTAxIDIwOC4yNyA0MjYuNjE5IDE5Ni41OTlDNDI1Ljc2MSAxOTMuNjMxIDQyNS40NTggMTkzLjUzMSA0MTguNzkzIDE5NC44ODlDMzk4LjE0MiAxOTguOTY0IDM3NS40MjEgMTk5LjE2NSAzNTQuNDE3IDE5NS4zNDJDMzUwLjY4MSAxOTQuNjM4IDM0Ny4yNDcgMTkzLjk4NCAzNDYuNzkzIDE5My44ODNDMzQ2LjMzOSAxOTMuNzMyIDM0NS42ODIgMTk0LjAzNCAzNDUuMjI4IDE5NC40ODdaIiBzdHJva2U9ImJsYWNrIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiLz4KPHBhdGggZD0iTTI5NC42MzYgMjI5Ljg1MUMyOTMuNzc4IDIzMC44MDYgMjkzLjAyIDIzMy40MjIgMjkyLjYxNiAyMzYuMzlDMjkyLjQ2NSAyMzcuNjQ4IDI5MS40NTUgMjQwLjYxNiAyOTAuMzQ0IDI0My4wMzFDMjg5LjIzNCAyNDUuNDQ1IDI4Ny40NjYgMjQ5LjcyMSAyODYuNTA3IDI1Mi41ODhDMjg1LjI5NSAyNTYuMDQzIDI4NC44NzQgMjYwLjA4NCAyODUuMjQ1IDI2NC43MTJDMjg1Ljg1MSAyNzIuMjA3IDI4Ni4wMDIgMjcyLjkxMiAyODcuMTYzIDI3NC4yMkMyODcuNzE5IDI3NC44NzMgMjg4LjEyMyAyNzQuOTc0IDI4OC41MjcgMjc0LjYyMkMyODguOTgxIDI3NC4yMiAyODkuNjM3IDI3NS4xNzUgMjkxLjAwMSAyNzguMjQ0QzI5My4yNzMgMjgzLjI3NCAyOTYuMzUzIDI4Ni43NDUgMjk3LjYxNSAyODUuNjg5QzI5OC4wNjkgMjg1LjI4NyAyOTguMzIyIDI4NC41ODIgMjk4LjE3IDI4NC4wMjlDMjk4LjAzNiAyODMuNDI1IDI5OC4yODggMjgzLjM5MiAyOTguOTI4IDI4My45MjhDMjk5LjczNiAyODQuNjgzIDI5OS45ODggMjg0LjczMyAzMDAuNjk1IDI4NC4xM0MzMDEuNTUzIDI4My40MjUgMzAxLjU1MyAyODIuNjIgMzAwLjM5MiAyNzYuMTMxQzI5OS44MzcgMjcyLjk2MiAzMDAuMDM5IDI2OC41MzUgMzAwLjg5NyAyNjYuMzcyQzMwMS4zMDEgMjY1LjI2NSAzMDEuNDUyIDI2NS43MTggMzAyLjEwOSAyNzAuNzk5QzMwMi40MTIgMjczLjE2MyAzMDMuNjc0IDI3NS4xMjUgMzA0LjgzNSAyNzUuMTI1QzMwNi43MDMgMjc1LjEyNSAzMDYuOTU2IDI3NC4xMTkgMzA2Ljk1NiAyNjcuMzc4QzMwNi45NTYgMjYzLjM1NCAzMDcuMjU5IDI1OS4zMjkgMzA3Ljc2NCAyNTYuODE0QzMwOC41MjEgMjUzLjI5MyAzMDguNTIxIDI1Mi4yMzYgMzA3Ljk2NiAyNDguOTY3QzMwNi44MDQgMjQyLjQyNyAzMDYuODA0IDI0MC40MTUgMzA3Ljk2NiAyMzcuMTk1QzMwOS4yMjggMjMzLjQ3MyAzMDkuNDMgMjMzLjYyNCAzMDEuNjA0IDIzMS4xMDhDMjk1Ljk5OSAyMjkuMjk3IDI5NS4yNDIgMjI5LjE0NiAyOTQuNjM2IDIyOS44NTFaIiBzdHJva2U9ImJsYWNrIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiLz4KPHBhdGggZD0iTTQ3My42NzYgMjI5LjkwMUM0NzIuNTE1IDIzMC40MDQgNDY5LjYzNyAyMzEuMzEgNDY3LjM2NSAyMzEuOTEzQzQ2MS43NjEgMjMzLjQyMyA0NjEuODExIDIzMy4zNzIgNDYzLjA3MyAyMzcuNzQ5QzQ2My44MTQgMjQwLjE2MyA0NjMuODY0IDI0My4yODIgNDYzLjIyNSAyNDcuMTA2QzQ2Mi40MTcgMjUyLjEzNiA0NjIuMzY2IDI1My4yOTMgNDYyLjk3MiAyNTYuODE0QzQ2My4zMjYgMjU4Ljk3NyA0NjMuNTc4IDI2My43MDYgNDYzLjUyOCAyNjcuMjc4QzQ2My40NzcgMjcyLjY2IDQ2My41NzggMjczLjkxOCA0NjQuMjg1IDI3NC42NzNDNDY2LjE1MyAyNzYuNzM1IDQ2OC4yMjMgMjczLjgxNyA0NjguNzc5IDI2OC4zODRDNDY5LjIzMyAyNjQuMDU4IDQ2OS45OTEgMjY0Ljk2NCA0NzAuMzk1IDI3MC4zNDZDNDcwLjY0NyAyNzMuMzE0IDQ3MC40NDUgMjc1LjAyNSA0NjkuNTM2IDI3OC41OTZDNDY4LjM3NSAyODMuMDIzIDQ2OC4zNzUgMjgzLjE3NCA0NjkuMjg0IDI4NC4xOEM0NzAuMTQyIDI4NS4xMzYgNDcwLjI0MyAyODUuMTM2IDQ3MS4xNTIgMjg0LjM4MUM0NzEuOTYgMjgzLjYyNyA0NzIuMDYxIDI4My42MjcgNDcyLjA2MSAyODQuMjgxQzQ3Mi4wNjEgMjg0LjczNCA0NzIuNDE0IDI4NS4zMzcgNDcyLjg2OSAyODUuNzRDNDczLjkyOSAyODYuNjQ1IDQ3Ni45MDggMjgzLjE3NCA0NzkuNDMyIDI3OC4wNDNDNDgwLjg5NyAyNzUuMDI1IDQ4MS41MDMgMjc0LjI3IDQ4MS45NTcgMjc0LjY3M0M0ODIuODY2IDI3NS40MjcgNDg0LjQ4MSAyNzIuNzExIDQ4NC44ODUgMjY5Ljg5NEM0ODYuMDk3IDI2MC41ODcgNDg1Ljg5NSAyNTcuNjE5IDQ4My40NzIgMjUwLjU3N0M0ODIuMTU5IDI0Ni45MDQgNDgwLjU5NCAyNDIuODMgNDc5LjkzNyAyNDEuNTIyQzQ3OS4yODEgMjQwLjIxNCA0NzguNjI1IDIzNy42OTkgNDc4LjQyMyAyMzUuODg4QzQ3OC4wNjkgMjMyLjY2OCA0NzcuMTEgMjI5LjcgNDc2LjMwMiAyMjkuMTk3QzQ3Ni4wNSAyMjkuMDk2IDQ3NC44ODggMjI5LjM5OCA0NzMuNjc2IDIyOS45MDFaIiBzdHJva2U9ImJsYWNrIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiLz4KPHBhdGggZD0iTTMzNy4yIDI0OS4zMThDMzM1Ljk4OCAyNTAuNzI3IDMzNi4zNDEgMjc2LjMzMiAzMzcuNzA1IDI4OS45NjRDMzQwLjM4MSAzMTYuNzc2IDM0MC45MzYgMzIwLjU5OSAzNDIuMjk5IDMyMS4yNTNDMzQ5LjExNSAzMjQuNDczIDM3MS41MzMgMzI0LjI3MiAzNzQuNjY0IDMyMS4wMDJDMzc1LjE2OCAzMjAuNDk5IDM3NS44MjUgMzE4LjEzNSAzNzYuMzMgMzE0Ljg2NUMzNzYuNzg0IDMxMS45NDcgMzc3Ljc5NCAzMDUuNDA4IDM3OC42MDIgMzAwLjI3N0MzODAuNjIxIDI4Ny43MDEgMzgxLjU4MSAyODAuMjU1IDM4Mi4xODcgMjcxLjY1M0MzODIuODQzIDI2My4yNTMgMzgyLjY0MSAyNjIuNjk5IDM3OS42NjIgMjYzLjU1NUMzNzYuMzggMjY0LjUxIDM2OC41NTQgMjY0LjE1OCAzNjMuNDA0IDI2Mi44NUMzNTUuNDc3IDI2MC44MzggMzQ2LjU0IDI1Ni4xMDkgMzQwLjIyOSAyNTAuNTI2QzMzOC4xMDkgMjQ4LjY2NCAzMzcuODA2IDI0OC41NjQgMzM3LjIgMjQ5LjMxOFoiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIvPgo8cGF0aCBkPSJNNDI4LjI4NSAyNTEuODg0QzQyMS4xNjYgMjU3LjU2OSA0MTMuMjM5IDI2MS40OTIgNDA1LjQxMyAyNjMuMzAzQzQwMC43MTcgMjY0LjM2IDM5Mi44NDEgMjY0LjQxIDM4OS45MTIgMjYzLjQwNEMzODcuMTg2IDI2Mi40NDggMzg2LjczMSAyNjIuOTUxIDM4Ni43MzEgMjY2LjgyNUMzODYuNzMxIDI3MC45NDkgMzg3Ljk5MyAyODQuMDc5IDM4OS4yNTYgMjkyLjYzMUMzOTIuNjg5IDMxNi41NzUgMzkzLjI5NSAzMjAuMTQ3IDM5NC4xNTMgMzIwLjk1MkMzOTcuOTkxIDMyNC42MjQgNDIzLjc0MSAzMjQuNDIzIDQyNy40NzcgMzIwLjc1MUM0MjguMTMzIDMyMC4wOTcgNDI5Ljk1MSAzMDcuOTIzIDQzMS42MTcgMjkyLjU4QzQzMy43MzggMjczLjY2NiA0MzQuMjQzIDI1MS4zMzEgNDMyLjYyNyAyNDkuNzIxQzQzMi4wMjEgMjQ5LjExNyA0MzEuMzY1IDI0OS40MTkgNDI4LjI4NSAyNTEuODg0WiIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIi8+CjxwYXRoIGQ9Ik0zNDIuMDQ3IDMyMS44NThDMzQxLjg5NSAzMjIuMTU5IDM0MS42OTMgMzI5LjQ1MyAzNDEuNTkyIDMzOC4wNTVDMzQxLjQ5MiAzNTMuMzk4IDM0MS40OTIgMzUzLjcgMzQyLjUwMSAzNTQuMzU0QzM0Ni44OTQgMzU3LjE3MSAzNjcuOTQ4IDM1Ny4zNzIgMzcxLjAyOCAzNTQuNjU2QzM3Mi41NDMgMzUzLjM0OCAzNzQuMTA4IDM0My44NCAzNzQuNjYzIDMzMi44MjRDMzc1LjIxOSAzMjEuNTA2IDM3NS4yMTkgMzIxLjQ1NSAzNzEuMjMgMzIyLjM2MUMzNjMgMzI0LjI3MiAzNTEuNDM4IDMyMy45NyAzNDMuMjA4IDMyMS42MDZDMzQyLjc1NCAzMjEuNDU1IDM0Mi4yNDkgMzIxLjYwNiAzNDIuMDQ3IDMyMS44NThaIiBzdHJva2U9ImJsYWNrIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiLz4KPHBhdGggZD0iTTM5My45MDEgMzIyLjExQzM5Mi42ODkgMzIzLjY2OSAzOTUuMzY1IDM1Mi41OTQgMzk2Ljg4IDM1NC40MDVDMzk4LjY5NyAzNTYuNTY4IDQxMy4yMzggMzU3LjQ3MyA0MjEuMDY0IDM1NS44NjRDNDI4LjIzNCAzNTQuNDU1IDQyNy42MjggMzU2LjE2NSA0MjcuNTI3IDMzOC4wMDZDNDI3LjQ3NiAzMjcuNTQzIDQyNy4yNzQgMzIyLjIxIDQyNi45MjEgMzIxLjkwOUM0MjYuNTY4IDMyMS42NTcgNDI1LjE1NCAzMjEuNzU4IDQyMy4zMzYgMzIyLjIxQzQxNS40MDkgMzI0LjAyMSA0MDQuMSAzMjQuMDIxIDM5Ni45ODEgMzIyLjIxQzM5NS4wMTIgMzIxLjcwNyAzOTQuMjU0IDMyMS42NTcgMzkzLjkwMSAzMjIuMTFaIiBzdHJva2U9ImJsYWNrIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiLz4KPHBhdGggZD0iTTM0MS42OTQgMzU1LjQ2MkMzMzkuNjc0IDM1Ny43MjUgMzM5LjMyIDM4MS4wMTYgMzQxLjA4OCAzOTUuNzU1QzM0My4xNTggNDEzLjQ2MiAzNDMuOTE1IDQyMC42MDYgMzQ0LjQ3IDQyNy45QzM0NS4xNzcgNDM3LjEwNSAzNDQuODc0IDQzNi42NTMgMzUxLjIzNiA0MzcuNjA4QzM1NS40MjcgNDM4LjI2MiAzNjIuMTQyIDQzNy41NTggMzYzLjU1NiA0MzYuMzAxQzM2NC4xNjIgNDM1Ljc0NyAzNjQuNDY1IDQzNC4yODggMzY0LjcxNyA0MzAuNDE1QzM2NS4yNzIgNDIyLjM2NiAzNjYuODM4IDQxMC4wOTIgMzY4Ljc1NiAzOTkuMzc3QzM3MS43MzUgMzgyLjcyNyAzNzEuNzg2IDM4MS44MjEgMzcxLjczNSAzNjguNzQyQzM3MS42MzQgMzU0Ljg1OCAzNzEuNjM0IDM1NC44MDggMzY4LjMwMiAzNTUuNjYzQzM2Mi40NDUgMzU3LjA3MSAzNTAuMTI1IDM1Ni42NjkgMzQzLjU2MiAzNTQuODA4QzM0Mi45MDUgMzU0LjY1NyAzNDIuMTk4IDM1NC45MDggMzQxLjY5NCAzNTUuNDYyWiIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIi8+CjxwYXRoIGQ9Ik00MjIuMzI3IDM1NS41MTJDNDE4LjQzOSAzNTYuNTE4IDQwMy43NDcgMzU2LjY2OSA0MDAuNDE0IDM1NS43MTNDMzk2LjUyNiAzNTQuNTU2IDM5Ni41NzcgMzU0LjMwNSAzOTYuNTc3IDM3MS42MDlDMzk2LjU3NyAzODUuNDkzIDM5Ni42NzggMzg3LjE1MyAzOTcuOTkxIDM5NS4zNTNDNDAwLjIxMiA0MDguOTg1IDQwMS4yNzMgNDE3Ljk5IDQwMS45MjkgNDI3LjI5NkM0MDIuMjgyIDQzMi45MyA0MDIuNjg2IDQzNi4wOTkgNDAzLjE0MSA0MzYuNTUyQzQwNS4xMSA0MzguNTY0IDQxOS4wNDUgNDM4LjMxMyA0MjEuMTY2IDQzNi4yNUM0MjEuNzcyIDQzNS41OTYgNDIyLjIyNiA0MzMuNTM0IDQyMi44MzIgNDI4LjgwNUM0MjMuMjg2IDQyNS4xODMgNDI0LjM5NyA0MTYuNjgyIDQyNS40MDcgNDA5Ljg0MUM0MjguNjg5IDM4Ni42IDQyOS4yOTUgMzc2LjQzOSA0MjguMTMzIDM2Mi4wMDFDNDI3LjUyNyAzNTQuMTU0IDQyNy41MjcgMzU0LjEwNCA0MjIuMzI3IDM1NS41MTJaIiBzdHJva2U9ImJsYWNrIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiLz4KPHBhdGggZD0iTTM0NS45MzUgNDM3LjIwNkMzNDUuNTMxIDQzNy42MDkgMzQ1LjMyOSA0MzkuNTcxIDM0NS4zMjkgNDQyLjg0MUMzNDUuMzI5IDQ0NS42NTggMzQ0Ljk3NSA0NDkuOTM0IDM0NC41MjEgNDUyLjQ0OUMzNDQuMDY3IDQ1NC45MTQgMzQzLjg2NSA0NTguMDgzIDM0NC4wMTYgNDU5LjM5MUMzNDQuMTY4IDQ2MC44NSAzNDQuMDY3IDQ2MS42NTUgMzQzLjc2NCA0NjEuNTA0QzM0My41MTEgNDYxLjMwMiAzNDEuNjQzIDQ2Mi41NiAzMzkuNjIzIDQ2NC4yMkMzMzYuODk3IDQ2Ni40ODQgMzM1LjY4NSA0NjcuMTg4IDMzNC44NzcgNDY2Ljk4N0MzMzQuMTIgNDY2Ljc4NiAzMzMuNTY0IDQ2Ni45ODcgMzMzLjExIDQ2Ny43NDFDMzMyLjcwNiA0NjguNDQ2IDMzMS45NDkgNDY4Ljc5OCAzMzAuODg4IDQ2OC43OThDMzI5LjEyMSA0NjguNzk4IDMyNy42NTcgNDcwLjEwNiAzMjcuNjU3IDQ3MS42NjVDMzI3LjY1NyA0NzIuODIyIDMyOS4xMjEgNDc0LjMzMSAzMzAuMzMzIDQ3NC4zMzFDMzMwLjc4NyA0NzQuMzMxIDMzMS4zOTMgNDc0Ljc4NCAzMzEuNjk2IDQ3NS4zMzdDMzMyLjUwNCA0NzYuODQ3IDMzNi45OTggNDc5LjY2NCAzNDAuNTgzIDQ4MC45MjFDMzQyLjM1IDQ4MS41NzUgMzQ0Ljg3NCA0ODIuOTMzIDM0Ni4xMzcgNDgzLjk5QzM1MS45OTQgNDg4LjgxOSAzNjEuMDgyIDQ4OC4zNjYgMzYzLjc1OCA0ODMuMTM1QzM2NC45MTkgNDgwLjgyMSAzNjUuMDcxIDQ3NC40MzIgMzY0LjExMSA0NzAuMDA1QzM2My43NTggNDY4LjM0NSAzNjMuNjU3IDQ2Mi41MSAzNjMuNzU4IDQ1Mi43QzM2My45MDkgNDQzLjA0MiAzNjMuODA4IDQzNy43NiAzNjMuNTA1IDQzNy4zNTdDMzYzLjEwMiA0MzYuODU0IDM2Mi40NDUgNDM2Ljg1NCAzNjAuODI5IDQzNy4yMDZDMzU4LjcwOSA0MzcuNzA5IDM0OC43NjIgNDM3LjQ1OCAzNDcuMzQ4IDQzNi45MDVDMzQ2Ljg5NCA0MzYuNzAzIDM0Ni4yODggNDM2Ljg1NCAzNDUuOTM1IDQzNy4yMDZaIiBzdHJva2U9ImJsYWNrIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiLz4KPHBhdGggZD0iTTQwMi44MzggNDM3LjQwOEM0MDIuNDM0IDQzNy45MTEgNDAyLjMzMyA0MzkuNjcyIDQwMi41ODUgNDQzLjU0NUM0MDIuNzg3IDQ0Ni41MTMgNDAyLjczNyA0NTAuNTM4IDQwMi40MzQgNDUyLjU1QzQwMi4xMzEgNDU0Ljg2NCA0MDIuMTgyIDQ1Ny42ODEgNDAyLjQ4NCA0NjAuMTk2QzQwMi44MzggNDYzLjM2NSA0MDIuNzg3IDQ2NS4zNzggNDAyLjE4MSA0NjkuMjUxQzQwMC41MTUgNDc5LjcxNCA0MDEuNDI0IDQ4NC41NDQgNDA1LjUxNCA0ODYuNDA1QzQwOS43NTUgNDg4LjMxNyA0MTUuMjA4IDQ4Ny40MTEgNDE5LjcwMiA0ODMuOTlDNDIxLjE2NiA0ODIuODg0IDQyMy45OTQgNDgxLjQyNSA0MjUuOTYzIDQ4MC42N0M0MjguMjg1IDQ3OS43NjUgNDMwLjUwNyA0NzguNTA3IDQzMi4wMjIgNDc3LjE0OUM0MzMuMzg1IDQ3NS45NDIgNDM0Ljk1IDQ3NC44MzUgNDM1LjYwNiA0NzQuNjM0QzQzOS4wNCA0NzMuNTI3IDQzOC42MzYgNDY5LjA1IDQzNS4xMDIgNDY5LjA1QzQzMy43ODkgNDY5LjA1IDQzMy4zODUgNDY4Ljg5OSA0MzMuNzM4IDQ2OC40OTZDNDM0LjQ0NSA0NjcuNjQxIDQzMi45ODEgNDY2LjY4NSA0MzEuNTY3IDQ2Ny4wMzhDNDMwLjY1OCA0NjcuMjM5IDQyOS42NDkgNDY2LjYzNSA0MjYuODcyIDQ2NC4zMjFDNDI0Ljc1MSA0NjIuNDYgNDIzLjE4NiA0NjEuNTA0IDQyMi44MzIgNDYxLjc1NkM0MjIuNDc5IDQ2Mi4wMDcgNDIyLjI3NyA0NjAuNzQ5IDQyMi4yMjYgNDU3LjgzMkM0MjEuNzIxIDQzNS4xOTUgNDIxLjkyMyA0MzYuMjAxIDQxOC43NDMgNDM3LjA1NkM0MTYuMzE5IDQzNy43MSA0MDcuMjgxIDQzNy43NiA0MDUuMDU5IDQzNy4xNTdDNDAzLjg0OCA0MzYuODA0IDQwMy4yOTIgNDM2Ljg1NSA0MDIuODM4IDQzNy40MDhaIiBzdHJva2U9ImJsYWNrIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiLz4KPC9zdmc+Cg==";
+    let bodySvgText = atob(bodySvgBase64);
+
+    const pathToPart = Object.entries(svgPathGroups).reduce((acc, [part, indexes]) => {
+      indexes.forEach((index) => { acc[index] = part; });
+      return acc;
+    }, {});
+
+    const state = {
+      page: "list",
+      index: 0,
+      route: [],
+      selected: {},
+      generatedTexts: {},
+      basic: {
+        facility: "テスト施設",
+        name: "サンプル太郎",
+        gender: "男性",
+        era: "昭和",
+        year: "11",
+        month: "2",
+        day: "19",
+        age: "90",
+        birth: "昭和11年2月19日（90歳）",
+        finder: "テスト太郎",
+        incidentAt: "2026年7月8日8時35分頃",
+        foundAt: "2026年7月8日8時35分頃"
+      }
+    };
+
+    const routes = {
+      yes: ["basic", "witness", "kind", "incidentTime", "occurPlace", "assistiveUse", "staff", "accidentEnvironment", "supportUsed", "pain", "injury", "conscious", "speech", "initial", "inside", "medical", "family", "report"],
+      no: ["basic", "witness", "foundState", "foundTime", "foundPosition", "assistiveDevice", "foundEnvironment", "lastSafeTime", "lastSafeHow", "pain", "injury", "conscious", "speech", "initial", "inside", "medical", "family", "report"]
+    };
+
+    const stepMeta = {
+      basic: ["基本情報", "基本情報の入力・選択"],
+      witness: ["基本情報", "事故の瞬間を直接確認しましたか？"],
+      kind: ["状況詳細", "どのような事故でしたか？"],
+      incidentTime: ["状況詳細", "発生日、発生時刻"],
+      occurPlace: ["状況詳細", "発生場所（１つ選択）"],
+      assistiveUse: ["状況詳細", "転倒時に補助具を使用していましたか？"],
+      fallMoment: ["状況詳細", "転倒時、利用者様はどのような状態でしたか？"],
+      cause: ["状況詳細", "転倒のきっかけとして考えられるものはありますか？"],
+      staff: ["状況詳細", "発生時、スタッフはどのように関わっていましたか？"],
+      accidentEnvironment: ["状況詳細", "事故地点周囲の環境"],
+      supportUsed: ["状況詳細", "転倒時に支えとして使用していたものはありましたか？"],
+      reaction: ["身体・意識状態", "発見時、呼びかけへの反応はありましたか？"],
+      foundState: ["状況詳細", "利用者を発見したとき、どのような状態でしたか？"],
+      foundTime: ["状況詳細", "発見日・発生時刻"],
+      foundPosition: ["状況詳細", "発見時の位置"],
+      assistiveDevice: ["状況詳細", "発見時、補助具が近くにありましたか？"],
+      foundEnvironment: ["状況詳細", "発見地点周囲の環境"],
+      lastSafeTime: ["状況詳細", "最後に無事な状態を確認した日時"],
+      lastSafeHow: ["状況詳細", "最後に無事な状態をどのように確認しましたか？"],
+      initial: ["状況と対応", "初期対応として実施したことを選択してください"],
+      pain: ["身体・意識状態", "ご本人は痛みを訴えましたか？"],
+      injury: ["身体・意識状態", "外観上の外傷・出血は確認されましたか？"],
+      conscious: ["身体・意識状態", "意識の状態（観察）"],
+      speech: ["身体・意識状態", "発言の様子"],
+      initial: ["初期対応", "初期対応"],
+      inside: ["内部共有・施設管理者連絡", "施設内報告"],
+      medical: ["医療機関への連絡", "医療機関への連絡"],
+      family: ["ご家族への連絡", "ご家族への連絡"],
+      report: ["最終報告書", "最終報告書"]
+    };
+
+    function start() {
+      state.route = ["basic", "witness"];
+      state.index = 0;
+      state.selected = {
+        witness: "はい（目撃あり）",
+        kind: "衝突・接触",
+        incidentTime: "2026/07/08 18:35",
+        occurPlace: "居室内の床",
+        assistiveUse: "使用していた",
+        assistiveUseSub: ["歩行器"],
+        fallMoment: "衝突・接触により転倒",
+        cause: "床に置かれた物につまずいた",
+        staff: "見守り中",
+        staffSub: ["移乗見守り"],
+        accidentEnvironment: "あった",
+        accidentEnvironmentSub: ["床が濡れていた"],
+        supportUsed: "あった",
+        supportUsedSub: ["手すり"],
+        reaction: "反応なし",
+        foundState: "床に倒れていた",
+        foundTime: "2026/07/08 11:47",
+        foundPosition: "居室内の床",
+        assistiveDevice: "あった",
+        assistiveDeviceSub: ["歩行器"],
+        foundEnvironment: "あった",
+        foundEnvironmentSub: ["床が濡れていた"],
+        lastSafeTime: "2026/07/08 11:47",
+        lastSafeHow: "巡回時",
+        initial: ["状況観察", "止血対応", "安静保持"],
+        pain: "はい",
+        painParts: ["左肩", "左腕（うで）", "左肘（ひじ）", "左肘から下", "左手", "左太もも", "左膝（ひざ）"],
+        injury: "いいえ",
+        injurySymptoms: ["皮下出血（あざ）"],
+        injuryParts: ["顔面"],
+        conscious: "呼びかけに反応しなかった",
+        consciousSub: ["自発的に開眼しなかった"],
+        speech: "会話が成立していなかった",
+        environment: "特記すべき環境要因なし",
+        inside: "いいえ",
+        medical: "いいえ",
+        medicalReasons: ["意識・会話に大きな変化がみられなかった"],
+        family: "いいえ",
+        familyReasons: ["意識・会話に大きな変化がみられなかった"]
+      };
+      state.generatedTexts = {};
+      showWizard();
+    }
+
+    function showWizard() {
+      document.getElementById("listPage").classList.add("hidden");
+      document.getElementById("wizardPage").classList.remove("hidden");
+      render();
+    }
+
+    function showList() {
+      document.getElementById("wizardPage").classList.add("hidden");
+      document.getElementById("listPage").classList.remove("hidden");
+      window.scrollTo(0, 0);
+    }
+
+    function totalForDisplay() {
+      const id = currentId();
+      if (id === "basic") return 10;
+      if (!state.selected.witness) return 10;
+      return 17;
+    }
+
+    function currentId() { return state.route[state.index]; }
+
+    function ensureRouteByWitness() {
+      state.route = state.selected.witness.includes("いいえ") ? routes.no.slice() : routes.yes.slice();
+    }
+
+    function render() {
+      const id = currentId();
+      const [section, title] = stepMeta[id];
+      const total = totalForDisplay();
+      document.getElementById("sectionName").textContent = section;
+      const isReport = id === "report";
+      document.getElementById("counter").style.display = isReport ? "none" : "";
+      document.getElementById("counter").textContent = `${Math.min(state.index + 1, total)} / ${total}`;
+      document.getElementById("progress").style.width = isReport ? "100%" : `${Math.min(100, ((state.index + 1) / total) * 100)}%`;
+      document.getElementById("backBtn").disabled = state.index === 0;
+      document.getElementById("nextBtn").textContent = id === "family" ? "最終報告書の作成へ" : id === "report" ? "一覧へ戻る" : "次へ";
+      document.getElementById("nextBtn").className = id === "family" ? "green" : "primary";
+      document.getElementById("wizardBody").innerHTML = renderStep(id, title);
+      bindStep(id);
+      hydrateBodyObjects();
+      window.scrollTo({ top: 150, behavior: "smooth" });
+    }
+
+    function renderStep(id, title) {
+      if (id === "basic") return `
+        <h2 class="screen-title">${title}</h2>
+        <div class="form-grid">
+          <label>施設名</label><input readonly value="${state.basic.facility}">
+          <label>利用者名</label><input id="nameInput" value="${state.basic.name}">
+          <label>性別</label><select id="genderInput"><option selected>男性</option><option>女性</option><option>その他</option></select>
+          <label>生年月日</label>
+          <div class="inline"><span class="seg"><button class="active" type="button">和暦</button><button type="button">西暦</button></span><select><option>昭和</option></select><select><option>${state.basic.year}</option></select>年<select><option>${state.basic.month}</option></select>月<select><option>${state.basic.day}</option></select>日</div>
+          <label>年齢</label><div class="inline"><input style="width:110px" value="${state.basic.age}">歳</div>
+          <label>第一発見者</label><input value="${state.basic.finder}">
+        </div>`;
+
+      if (id === "witness") return `${titleBlock(title)}<div class="choices two">${choice("witness", "はい（目撃あり）")}${choice("witness", "いいえ（目撃なし）")}</div>`;
+      if (id === "incidentTime" || id === "foundTime" || id === "lastSafeTime") return `${titleBlock(title)}
+        <input value="${state.selected[id] || ""}" placeholder="年 /月/日 --:--">
+        <button style="margin-top:10px" type="button">現在時刻を設定</button>`;
+      if (id === "foundState") return `${titleBlock(title)}
+        <div class="choices two">
+          ${imageChoice("foundState", "床に倒れていた", "assets/floor-lying.png")}
+          ${imageChoice("foundState", "床に座り込んでいた", "assets/floor-sitting.png")}
+          ${choice("foundState", "外傷のみ認めた", "wide-choice")}
+        </div>`;
+      if (id === "staff") return `${titleBlock(title)}
+        <div class="choices">
+          ${expandChoice("staff", "介助・支援中", ["移乗介助", "歩行介助", "車いす移動介助", "トイレ介助", "入浴介助", "その他"], "staffSub")}
+          ${expandChoice("staff", "見守り中", ["移乗見守り", "歩行見守り", "車いす移動見守り", "トイレ見守り", "入浴見守り", "その他"], "staffSub")}
+          ${choice("staff", "その他", "row")}
+        </div>`;
+      if (id === "assistiveUse") return `${titleBlock(title)}
+        <div class="choices">
+          ${expandChoice("assistiveUse", "使用していた", ["杖", "歩行器", "車いす", "装具", "その他"], "assistiveUseSub")}
+          ${choice("assistiveUse", "使用していなかった", "row")}
+          ${choice("assistiveUse", "不明", "row")}
+        </div>`;
+      if (id === "assistiveDevice") return `${titleBlock(title)}
+        <div class="choices">
+          ${expandChoice("assistiveDevice", "あった", ["杖", "歩行器", "車いす", "その他"], "assistiveDeviceSub")}
+          ${choice("assistiveDevice", "なかった", "row")}
+          ${choice("assistiveDevice", "確認できなかった", "row")}
+        </div>`;
+      if (id === "supportUsed") return `${titleBlock(title)}
+        <div class="choices">
+          ${expandChoice("supportUsed", "あった", ["手すり", "壁", "家具（ベッド・机等）", "ドア・ドア枠", "その他"], "supportUsedSub")}
+          ${choice("supportUsed", "なかった", "row")}
+          ${choice("supportUsed", "不明", "row")}
+        </div>`;
+      if (id === "accidentEnvironment" || id === "foundEnvironment") {
+        const subKey = id === "accidentEnvironment" ? "accidentEnvironmentSub" : "foundEnvironmentSub";
+        const prompt = id === "accidentEnvironment" ? "事故につながる可能性のある環境要因はありましたか？" : "事故につながる可能性のある環境要因はありましたか？";
+        return `${titleBlock(title)}<p><b>${prompt}</b></p>
+          <div class="choices">
+            ${expandChoice(id, "あった", ["床が濡れていた", "段差・敷居があった", "床に物が置かれていた", "マット・敷物があった", "照明が暗かった", "その他"], subKey)}
+            ${choice(id, "なかった", "row")}
+            ${choice(id, "確認できなかった", "row")}
+          </div>`;
+      }
+      if (id === "pain") return `${titleBlock(title)}
+        <div class="choices">${expandBodyQuestion("pain", "はい", "痛みの部位（人体図タップ・複数選択可）", "painParts")}${choice("pain", "いいえ", "row")}</div>`;
+      if (id === "injury") return `${titleBlock(title)}
+        <div class="choices">
+          ${expandInjuryQuestion()}
+          ${choice("injury", "いいえ", "row")}
+          ${choice("injury", "判断できなかった", "row")}
+        </div>`;
+      if (id === "conscious") return `${titleBlock(title)}
+        <div class="choices">
+          ${choice("conscious", "呼びかけにすぐ反応した", "row")}
+          ${choice("conscious", "呼びかけに遅れて反応した", "row")}
+          ${expandChoice("conscious", "呼びかけに反応しなかった", ["自発的に開眼した", "自発的に開眼しなかった"], "consciousSub")}
+        </div>`;
+      if (id === "inside") return `${titleBlock(title)}${aiTextarea("内部共有文（ルールベース・即時生成）", "inside", insideText(), false)}
+        <p><b>報告フローに沿って対応しましたか？</b></p>
+        <div class="choices">${expandInsideYes()}${expandChoice("inside", "いいえ", ["状態が安定していた", "外傷が確認されなかった", "その他"], "insideReasons")}</div>`;
+      if (id === "medical") return `${titleBlock(title)}${aiTextarea("医療機関への連絡文（AI生成）", "medical", medicalText(), true)}
+        <p><b>医療機関へ連絡しましたか？</b></p>
+        <div class="choices">${expandMedical()}${expandChoice("medical", "いいえ", ["意識・会話に大きな変化がみられなかった", "痛みの訴えが確認されなかった", "外傷・出血が確認されなかった", "施設の報告基準に該当しなかった", "その他"], "medicalReasons")}</div>`;
+      if (id === "family") return `${titleBlock(title)}${aiTextarea("ご家族への連絡文（AI生成）", "family", familyText(), true)}
+        <p><b>ご家族へ連絡しましたか？</b></p>
+        <div class="choices">${expandFamily()}${expandChoice("family", "いいえ（連絡未実施）", ["意識・会話に大きな変化がみられなかった", "痛みの訴えが確認されなかった", "外傷・出血が確認されなかった", "施設の報告基準に該当しなかった", "その他"], "familyReasons")}</div>`;
+      if (id === "report") return renderReport();
+
+      const options = {
+        kind: ["転倒（転落含む）", "衝突・接触", "その他"],
+        occurPlace: ["ベッド上", "ベッド付近の床", "居室内の床", "トイレ内", "トイレ出入口", "廊下", "浴室", "脱衣室", "食堂・デイルーム", "その他"],
+        foundPosition: ["ベッド上", "ベッド付近の床", "居室内の床", "トイレ内", "トイレ出入口", "廊下", "浴室", "脱衣室", "食堂・デイルーム", "その他"],
+        fallMoment: ["衝突・接触により転倒", "歩行中につまずいた", "立ち上がり時にふらついた", "移乗時に姿勢を崩した", "その他"],
+        cause: ["床に置かれた物につまずいた", "足元が滑った", "手すりを使用していなかった", "原因不明", "その他"],
+        reaction: ["反応あり", "反応なし", "普段より反応が弱い"],
+        lastSafeHow: ["巡回時", "センサー・カメラ確認時", "ナースコール対応時", "直接ケア実施時", "会話により確認", "その他"],
+        initial: ["状況観察", "応援を依頼", "止血対応", "安静保持", "その他"],
+        conscious: ["呼びかけにすぐ反応した", "呼びかけに遅れて反応した", "呼びかけに反応しなかった"],
+        speech: ["会話が成立していた", "会話が成立していなかった"]
+      }[id] || [];
+
+      const multi = ["initial"].includes(id);
+      return `${titleBlock(title)}<div class="choices">${options.map((o) => choice(id, o, "row", multi)).join("")}</div>`;
+    }
+
+    function titleBlock(title) { return `<h2 class="screen-title">${title}</h2>`; }
+
+    function choice(key, label, cls = "", multi = false) {
+      const v = state.selected[key];
+      const selected = multi ? (Array.isArray(v) && v.includes(label)) : v === label;
+      return `<button type="button" class="choice ${cls} ${selected ? "selected" : ""}" data-key="${key}" data-value="${label}" data-multi="${multi ? "1" : "0"}">${label}</button>`;
+    }
+
+    function imageChoice(key, label, src) {
+      const selected = state.selected[key] === label;
+      return `<button type="button" class="choice image-choice ${selected ? "selected" : ""}" data-key="${key}" data-value="${label}" data-multi="0">
+        <span class="image-crop"><img src="${src}" alt="${label}"></span>
+        <span>${label}</span>
+      </button>`;
+    }
+
+    function expandChoice(key, label, chips, subKey) {
+      const selected = state.selected[key] === label;
+      return `<div class="choice-card ${selected ? "selected" : ""}" data-card-key="${key}" data-card-value="${label}">
+        <div class="top"><span>${label}</span><span>${selected ? "✓" : "○"}</span></div>
+        ${selected ? `<div class="sub">${chips.map((c) => chip(subKey, c)).join("")}</div>` : ""}
+      </div>`;
+    }
+
+    function chip(key, label) {
+      const selected = Array.isArray(state.selected[key]) && state.selected[key].includes(label);
+      return `<span class="chip ${selected ? "selected" : ""}" data-chip-key="${key}" data-chip-value="${label}">${label}</span>`;
+    }
+
+    function expandInsideYes() {
+      const selected = state.selected.inside === "はい";
+      return `<div class="choice-card ${selected ? "selected" : ""}" data-card-key="inside" data-card-value="はい">
+        <div class="top"><span>はい</span><span>${selected ? "✓" : "○"}</span></div>
+        ${selected ? `<div class="sub" style="display:block">
+          <div class="detail-field">
+            <label>実施スタッフ名</label>
+            <input type="text" value="${state.basic.finder}" aria-label="実施スタッフ名">
+          </div>
+          <div class="detail-field">
+            <label>実施日・実施時刻</label>
+            <div class="inline-check">
+              <input type="text" value="2026/07/08 23:17" aria-label="実施日・実施時刻">
+              <span class="check-dot">✓</span>
+            </div>
+          </div>
+          <button class="ghost" type="button">現在時刻を設定</button>
+          <div class="sub" style="margin-top:16px">${["管理者へ報告", "看護職へ報告", "オンコールへ報告", "その他"].map((x) => chip("insideReportTo", x)).join("")}</div>
+        </div>` : ""}
+      </div>`;
+    }
+
+    function expandInjuryQuestion() {
+      const selected = state.selected.injury === "はい";
+      const symptoms = ["皮下出血（あざ）", "出血", "赤み・腫れ", "擦過傷"];
+      return `<div class="choice-card ${selected ? "selected" : ""}" data-card-key="injury" data-card-value="はい">
+        <div class="top"><span>はい</span><span>${selected ? "✓" : "○"}</span></div>
+        ${selected ? `<div class="sub" style="display:block">
+          <b style="color:#2563eb">確認された症状（各症状に部位指定）</b>
+          <div class="sub">${symptoms.map((s) => chip("injurySymptoms", s)).join("")}</div>
+          ${expandBodyInner("外傷・出血の部位（人体図タップ・複数選択可）", "injuryParts")}
+        </div>` : ""}
+      </div>`;
+    }
+
+    function expandBodyQuestion(key, yesLabel, bodyLabel, partsKey) {
+      const parts = state.selected[partsKey] || [];
+      return `<div class="choice-card ${state.selected[key] === yesLabel ? "selected" : ""}" data-card-key="${key}" data-card-value="${yesLabel}">
+        <div class="top"><span>${yesLabel}</span><span>${state.selected[key] === yesLabel ? "✓" : "○"}</span></div>
+        ${state.selected[key] === yesLabel ? `<div class="sub" style="display:block">
+          <b style="color:#2563eb">${bodyLabel}</b>
+          ${expandBodyInner(bodyLabel, partsKey, false)}
+        </div>` : ""}
+      </div>`;
+    }
+
+    function expandBodyInner(bodyLabel, partsKey, showLabel = true) {
+      const parts = state.selected[partsKey] || [];
+      return `${showLabel ? `<b style="color:#2563eb">${bodyLabel}</b>` : ""}
+          <div class="body-map">
+            <div class="body-stage ${parts.length ? "has-selected" : ""}">
+              <div class="body-svg-container" data-parts-key="${partsKey}" aria-label="人体図"></div>
+            </div>
+            <p class="body-note">タップまたはチェックで部位を選択</p>
+          </div>
+          <div class="selected-parts"><b>選択中の部位 <span style="background:#dbe4ef;border-radius:50%;padding:4px 9px">${parts.length}</span></b>${parts.map((p) => `<span class="part-tag" data-remove-part="${p}" data-parts-key="${partsKey}" style="color:${colorFor(p)}">${p} ×</span>`).join("")}<button class="ghost" type="button" data-clear-parts="${partsKey}">すべてクリア</button></div>
+          <div class="parts-list">${bodyParts.map(([name, color], i) => `<label class="part-row"><input type="checkbox" style="width:auto" data-part="${name}" data-parts-key="${partsKey}" ${parts.includes(name) ? "checked" : ""}><span class="swatch" style="background:${color}"></span>${i + 1}. ${name}</label>`).join("")}</div>
+          ${parts.slice(0, 4).map((p) => `<div class="photo-block"><b style="color:${colorFor(p)}">${p}</b><div class="photo-actions"><button class="dash" type="button">📷 撮影</button><button class="dash" type="button">🖼 写真から選択 <span style="color:#98a2b3;font-weight:500">任意</span></button></div></div>`).join("")}`;
+    }
+
+    async function hydrateBodyObjects() {
+      const containers = document.querySelectorAll(".body-svg-container");
+      if (!containers.length) return;
+      if (!bodySvgText) {
+        try {
+          const response = await fetch("資料/部位選択/image (1).svg");
+          bodySvgText = await response.text();
+        } catch (error) {
+          bodySvgText = "";
+        }
+      }
+      containers.forEach((container) => {
+        if (bodySvgText) {
+          container.innerHTML = bodySvgText;
+          paintBodySvg(container);
+        } else {
+          container.innerHTML = `<img src="資料/部位選択/image (1).svg" alt="人体図">`;
+        }
+      });
+    }
+
+    function paintBodySvg(container) {
+      const partsKey = container.dataset.partsKey;
+      const selected = state.selected[partsKey] || [];
+      const paths = Array.from(container.querySelectorAll("path"));
+      paths.forEach((path, index) => {
+        const part = pathToPart[index];
+        path.style.transition = "fill .12s ease, opacity .12s ease";
+        path.style.cursor = part ? "pointer" : "default";
+        if (!part) return;
+        const isSelected = selected.includes(part);
+        path.style.fill = isSelected ? colorFor(part) : "#f8fafc";
+        path.style.fillOpacity = isSelected ? "0.86" : "1";
+        path.style.stroke = isSelected ? "#334155" : "#aab7c7";
+        path.style.strokeWidth = isSelected ? "1.3" : "0.9";
+        path.onclick = (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          togglePart(partsKey, part);
+        };
+      });
+    }
+
+    function togglePart(partsKey, part) {
+      state.selected[partsKey] = state.selected[partsKey] || [];
+      state.selected[partsKey] = state.selected[partsKey].includes(part)
+        ? state.selected[partsKey].filter((p) => p !== part)
+        : [...state.selected[partsKey], part];
+      render();
+    }
+
+    function expandMedical() {
+      return `<div class="choice-card ${state.selected.medical === "はい" ? "selected" : ""}" data-card-key="medical" data-card-value="はい">
+        <div class="top"><span>はい</span><span>${state.selected.medical === "はい" ? "✓" : "○"}</span></div>
+        ${state.selected.medical === "はい" ? `<div class="sub" style="display:block">
+          <label>実施スタッフ名</label><input placeholder="スタッフ名">
+          <label>実施日・実施時刻</label><input placeholder="年 / 月 / 日 --:--">
+          <button type="button">現在時刻を設定</button>
+          <label>医療機関名</label><input>
+          <label>医療機関からの指示</label><div class="inline">${["様子観察", "医療機関を受診", "往診", "救急搬送", "その他"].map((x) => chip("medicalOrders", x)).join("")}</div>
+        </div>` : ""}
+      </div>`;
+    }
+
+    function expandFamily() {
+      return `<div class="choice-card ${state.selected.family === "はい" ? "selected" : ""}" data-card-key="family" data-card-value="はい">
+        <div class="top"><span>はい</span><span>${state.selected.family === "はい" ? "✓" : "○"}</span></div>
+        ${state.selected.family === "はい" ? `<div class="sub" style="display:block">
+          <label>実施スタッフ名</label><input placeholder="スタッフ名">
+          <label>実施日・実施時刻</label><input placeholder="年 / 月 / 日 --:--">
+          <button type="button">現在時刻を設定</button>
+          <p><b>ご家族につながりましたか？</b></p>
+          <div class="choice-card selected"><div class="top"><span>はい</span><span>✓</span></div><div class="sub">${["説明内容について理解が得られた", "医療機関受診は行わない方針とした", "様子観察を継続する方針とした", "状況変化時に再度連絡する方針とした", "後日あらためて説明する方針とした", "その他"].map((x) => chip("familyAgree", x)).join("")}</div></div>
+        </div>` : ""}
+      </div>`;
+    }
+
+    function aiTextarea(title, key, value, ai = false) {
+      const generated = state.generatedTexts[key] || "";
+      return `<div class="ai-box" data-ai-box="${key}">
+        <h3>📋 ${title}</h3>
+        <div class="ai-actions">
+          <button class="generate" type="button" data-generate-key="${key}" data-ai="${ai ? "1" : "0"}">🛡 文章を生成</button>
+          <div class="ai-progress" data-progress-key="${key}">
+            <div class="ai-bar"><span></span></div>
+            <div class="ai-progress-label">7%生成中...（1秒経過）</div>
+          </div>
+        </div>
+        <textarea data-textarea-key="${key}" placeholder="文章を生成するとここに表示されます">${generated}</textarea>
+      </div>`;
+    }
+
+    function colorFor(part) { return (bodyParts.find(([p]) => p === part) || ["", "#2563eb"])[1]; }
+
+    function insideText() {
+      const witnessed = state.selected.witness.includes("はい");
+      if (witnessed) {
+        return `${state.basic.incidentAt}、${state.basic.name}様がトイレ内にて転倒されました。第一発見者は${state.basic.finder}です。
+歩行介助中に発生しました。支えになる物は使用されていませんでした。歩行器を使用されていました。
+周囲環境を確認しましたが、特記すべき環境要因は認められませんでした。
+痛みの訴えはありませんでした。出血を確認しました。
+呼びかけに対しすぐに反応がありました。会話は成立していました。
+初期対応として状況観察を実施しました。
+報告は以上です。今後の対応についてご指示をお願いいたします。`;
+      }
+      return `${state.basic.incidentAt}、${state.basic.name}様が食堂・デイルームにて床に倒れている状態で発見されました。第一発見者は担当職員です。最後にお変わりない状態を確認したのは前日の巡回時です。
+発生時の状況は不明です。発見時、補助具は近くにありませんでした。
+周囲環境を確認しましたが、特記すべき環境要因は認められませんでした。
+痛みの訴えはありませんでした。外観上の外傷・出血は確認されませんでした。
+呼びかけに対してすぐに反応がありました。会話が成立しませんでした。
+初期対応として状況観察を実施しました。
+報告は以上です。今後の対応についてご指示をお願いいたします。`;
+    }
+
+    function medicalText() {
+      const witnessed = state.selected.witness.includes("はい");
+      if (witnessed) {
+        return `お世話になっております。テスト施設でございます。
+入居者の${state.basic.name}様、1930年代生まれ、${state.basic.age}代の男性についてお伝えします。
+
+本日8時35分頃、${state.basic.name}様がトイレ内で転倒されました。職員が転倒の瞬間を目撃しました。転倒時は歩行介助中に発生しました。周囲環境を確認しましたが、特記すべき環境要因は認められませんでした。痛みの訴えはありませんでしたが、出血を確認しました。呼びかけに対しすぐに反応があり、会話は成立していました。初期対応として状況観察を実施しました。
+
+このまま施設で様子を見てよろしいでしょうか。診察の必要があればご指示いただけますでしょうか。`;
+      }
+      return `お世話になっております。テスト施設でございます。入居者の${state.basic.name}様、1940年代生まれ、${state.basic.age}代の男性についてお伝えします。
+
+本日8時35分頃、${state.basic.name}様が食堂・デイルームにて床に倒れている状態で発見されました。発見者は担当職員です。最後の無事確認は前日の巡回時でした。発生時の状況は不明です。痛みの訴えはありませんでした。外観上の外傷・出血は確認されませんでした。呼びかけに対しすぐに反応がありましたが、会話は成立しませんでした。初期対応として状況観察を実施しました。
+
+このまま施設で様子を見てよろしいでしょうか。診察の必要があればご指示いただけますでしょうか。`;
+    }
+
+    function familyText() {
+      const witnessed = state.selected.witness.includes("はい");
+      if (witnessed) {
+        return `突然のお電話失礼いたします。テスト施設でございます。${state.basic.name}様のご家族様でいらっしゃいますでしょうか。念のためご様子のご報告としてお電話いたしました。
+
+本日8時35分頃、${state.basic.name}様がトイレ内で転倒されました。職員がその瞬間を目撃し、すぐに対応いたしました。歩行介助中でしたが、支えになる物は使用されていませんでした。周囲の環境に特記すべき要因は見られませんでした。
+
+${state.basic.name}様は転倒後、すぐに反応があり、会話も成立しておりました。痛みの訴えはございませんでしたが、出血を確認いたしました。現在は様子観察を行っております。
+
+医療機関にも連絡し、様子観察の指示をいただきました。また、ご家族様にも連絡し、状況をご説明いたしました。
+
+何かご不明な点やご心配なことがございましたら、いつでもお電話ください。`;
+      }
+      return `突然のお電話失礼いたします。テスト施設でございます。${state.basic.name}様のご家族様でいらっしゃいますでしょうか。念のためご様子のご報告としてお電話いたしました。
+
+本日朝、食堂・デイルームにて${state.basic.name}様が床に倒れている状態で発見されました。職員が巡回時に確認した昨日朝にはお変わりない状態でした。発生時の状況は不明ですが、外傷や出血は確認されませんでした。${state.basic.name}様に声をかけたところ、すぐに反応がありましたが、会話は成立しておりません。
+
+現在、${state.basic.name}様の様子を観察しております。また、病院にも連絡し、指示を仰いだところ、様子観察となりました。ご家族様にもご連絡し、現在の状況をご説明したところ、理解をいただきました。今後、状況に変化があれば再度ご連絡させていただきます。
+
+何かご不明な点やご心配なことがございましたら、いつでもお電話ください。`;
+    }
+
+    function renderReport() {
+      const witnessed = state.selected.witness.includes("はい");
+      const reportText = witnessed ? witnessedReportText() : unwitnessedReportText();
+      return `<h2 class="screen-title">最終報告書の作成</h2>
+        <div class="final-report">
+          <h3>最終報告書（AI生成）</h3>
+          <p class="report-lead">前段で作成した内部共有文・連絡文を統合し、最終報告書をAIが作成します。氏名・施設名は送信前に自動で匿名化されます。</p>
+          <button class="final-generate" type="button">最終報告書を生成</button>
+          <h3 class="report-section-title">基本情報</h3>
+          <table class="report-table basic">
+            <tr><th>施設名</th><td>テスト施設</td></tr>
+            <tr><th>利用者</th><td>${state.basic.name}</td></tr>
+            <tr><th>生年月日</th><td>${state.basic.birth}</td></tr>
+            <tr><th>性別</th><td>${state.basic.gender}</td></tr>
+            <tr><th>事故発生日時</th><td>${state.basic.incidentAt}</td></tr>
+            <tr><th>発生場所</th><td>居室</td></tr>
+            <tr><th>発見日時</th><td>${state.basic.foundAt}</td></tr>
+            <tr><th>発見場所</th><td>居室</td></tr>
+            <tr><th>事故種別</th><td>${state.selected.kind || "転倒疑い"}</td></tr>
+            <tr><th>インシデント区分</th><td>転倒（転落含む）</td></tr>
+            <tr><th>第一発見者</th><td>${state.basic.finder}</td></tr>
+            <tr><th>上長への報告</th><td>報告済み</td></tr>
+            <tr><th>医療機関への連絡</th><td>連絡済み</td></tr>
+            <tr><th>ご家族への連絡</th><td>連絡済み</td></tr>
+          </table>
+          <h3 class="report-body-title">報告書本文</h3>
+          <div class="report-text-box"><div class="report-text">${reportText}</div>${stampTable()}</div>
+        </div>`;
+    }
+
+    function stampTable() {
+      return `<table class="stamp-table" aria-label="確認印欄">
+        <tr><th>施設長</th><th>事務長</th><th>相談員<br>ケアマネ</th><th>医務/看護</th><th>栄養士</th><th>介護主任</th><th>介護主任</th><th>介護主任</th><th>報告者</th></tr>
+        <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      </table>`;
+    }
+
+    function witnessedReportText() {
+      return `〈事故概要〉
+入居者の${state.basic.name}（${state.basic.age}代・${state.basic.gender}）が、${state.basic.incidentAt}、トイレ内で転倒されました。第一発見者は${state.basic.finder}で、転倒の瞬間を目撃しました。転倒時は歩行介助中であり、歩行器を使用されていました。周囲の環境要因は認められませんでした。
+
+〈状況と対応〉
+転倒時、${state.basic.finder}が直ちに対応しました。${state.basic.name}様はすぐに呼びかけに反応し、会話も成立していました。初期対応として状況観察を実施しました。報告フローは実施され、${state.basic.finder}が管理者へ報告しました。また、医療機関にも連絡し、指示は様子観察となりました。ご家族にも連絡し、説明内容について理解が得られました。
+
+〈外傷と身体状態〉
+${state.basic.name}様は痛みの訴えはありませんでしたが、出血が確認されました。意識状態は良好で、呼びかけにすぐ反応し、会話も成立していました。
+
+〈環境要因〉
+特記すべき環境要因は認められませんでした。
+
+〈原因分析と再発防止策〉
+転倒は歩行介助中に発生しましたが、転倒の直接的な原因は特定できませんでした。今後の対策として、歩行介助時のリスク評価をより詳細に行い、必要に応じて追加のサポートを検討します。また、職員間の情報共有を強化し、転倒リスクの高い入居者への対応を改善します。予見困難な事例として整理します。
+
+〈総括〉
+${state.basic.name}様の転倒事故に対して迅速な対応が取られ、医療機関とご家族にも連絡がされました。今後の対応については、リスク評価の強化と職員間の情報共有の改善を図ります。`;
+    }
+
+    function unwitnessedReportText() {
+      return `〈事故概要〉
+入居者の${state.basic.name}様、${state.basic.age}代・${state.basic.gender}が${state.basic.incidentAt}、食堂・デイルームの床に倒れている状態で発見されました。最後に無事を確認したのは前日の巡回時で、その時は異常は確認されませんでした。
+
+〈状況と対応〉
+発見時、${state.basic.name}様は床に倒れており、呼びかけにすぐに反応しましたが、会話は成立していませんでした。初期対応として状況観察が実施されました。報告フローは実施され、${state.basic.finder}が管理者へ報告しました。医療機関連絡は看護職により行われ、医療機関からは様子観察の指示を受けました。ご家族への連絡も行われ、理解が得られ、医療機関受診は行わない方針となりました。
+
+〈外傷と身体状態〉
+痛みの訴えはなく、外傷や出血は確認されませんでした。意識状態は呼びかけにすぐ反応しましたが、言語応答は会話が成立していませんでした。
+
+〈環境要因〉
+特記すべき環境要因は認められませんでした。
+
+〈原因分析と再発防止策〉
+今回の事例は予見困難な事例と判断されます。発生時の状況が不明であり、外傷や痛みの訴えがなかったことから、突発的な体調変化が考えられます。今後の対策として、巡回時の確認をさらに徹底し、入居者の様子に異変がないか常に注意を払うこととします。また、職員間の情報共有を強化し、入居者の日々の状態変化に敏感に対応できるよう努めます。
+
+〈総括〉
+${state.basic.name}様が食堂・デイルームの床に倒れている状態で発見され、状況観察と医療機関への連絡を行い、ご家族にも連絡しました。医療機関からは様子観察の指示を受け、ご家族とも合意を得て対応しました。`;
+    }
+
+    function bindStep(id) {
+      document.querySelectorAll("[data-key]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const key = btn.dataset.key;
+          const value = btn.dataset.value;
+          if (btn.dataset.multi === "1") {
+            state.selected[key] = state.selected[key] || [];
+            state.selected[key] = state.selected[key].includes(value) ? state.selected[key].filter((v) => v !== value) : [...state.selected[key], value];
+          } else {
+            state.selected[key] = value;
+            if (key === "witness") {
+              state.generatedTexts = {};
+              ensureRouteByWitness();
+            }
+          }
+          render();
+        });
+      });
+      document.querySelectorAll("[data-card-key]").forEach((card) => {
+        card.addEventListener("click", (e) => {
+          if (e.target.closest("[data-chip-key]") || e.target.closest("input") || e.target.closest("textarea") || e.target.closest("button")) return;
+          state.selected[card.dataset.cardKey] = card.dataset.cardValue;
+          render();
+        });
+      });
+      document.querySelectorAll("[data-chip-key]").forEach((chipEl) => {
+        chipEl.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const key = chipEl.dataset.chipKey;
+          const value = chipEl.dataset.chipValue;
+          state.selected[key] = state.selected[key] || [];
+          state.selected[key] = state.selected[key].includes(value) ? state.selected[key].filter((v) => v !== value) : [...state.selected[key], value];
+          render();
+        });
+      });
+      document.querySelectorAll("[data-part]").forEach((box) => {
+        box.addEventListener("change", () => {
+          const part = box.dataset.part;
+          const partsKey = box.dataset.partsKey;
+          state.selected[partsKey] = state.selected[partsKey] || [];
+          state.selected[partsKey] = box.checked ? [...new Set([...state.selected[partsKey], part])] : state.selected[partsKey].filter((p) => p !== part);
+          render();
+        });
+      });
+      document.querySelectorAll("[data-remove-part]").forEach((tag) => {
+        tag.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const partsKey = tag.dataset.partsKey;
+          const part = tag.dataset.removePart;
+          state.selected[partsKey] = (state.selected[partsKey] || []).filter((p) => p !== part);
+          render();
+        });
+      });
+      document.querySelectorAll("[data-clear-parts]").forEach((clear) => {
+        clear.addEventListener("click", (e) => {
+          e.stopPropagation();
+          state.selected[clear.dataset.clearParts] = [];
+          render();
+        });
+      });
+      document.querySelectorAll("[data-generate-key]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          generateAiText(btn.dataset.generateKey, btn.dataset.ai === "1");
+        });
+      });
+      const name = document.getElementById("nameInput");
+      if (name) name.addEventListener("input", () => { state.basic.name = name.value || "サンプル太郎"; });
+      const gender = document.getElementById("genderInput");
+      if (gender) gender.addEventListener("change", () => { state.basic.gender = gender.value; });
+    }
+
+    function generatedTextFor(key) {
+      if (key === "inside") return insideText();
+      if (key === "medical") return medicalText();
+      if (key === "family") return familyText();
+      return "";
+    }
+
+    function generateAiText(key, ai) {
+      const box = document.querySelector(`[data-ai-box="${key}"]`);
+      if (!box) return;
+      const textarea = box.querySelector(`[data-textarea-key="${key}"]`);
+      const button = box.querySelector(`[data-generate-key="${key}"]`);
+      const progress = box.querySelector(`[data-progress-key="${key}"]`);
+      const bar = progress?.querySelector(".ai-bar span");
+      const label = progress?.querySelector(".ai-progress-label");
+      const text = generatedTextFor(key);
+
+      if (!ai) {
+        state.generatedTexts[key] = text;
+        render();
+        return;
+      }
+
+      textarea.value = "";
+      button.disabled = true;
+      button.classList.add("generating");
+      button.textContent = "生成中...";
+      progress.classList.add("active");
+
+      const start = Date.now();
+      const duration = 1900;
+      const tick = () => {
+        const elapsed = Date.now() - start;
+        const ratio = Math.min(1, elapsed / duration);
+        const eased = 1 - Math.pow(1 - ratio, 2);
+        const percent = Math.min(99, Math.max(7, Math.round(7 + eased * 91)));
+        const seconds = Math.max(1, Math.ceil(elapsed / 1000));
+        bar.style.width = `${percent}%`;
+        label.textContent = `${percent}%生成中...（${seconds}秒経過）`;
+        if (ratio < 1) {
+          requestAnimationFrame(tick);
+          return;
+        }
+        state.generatedTexts[key] = text;
+        render();
+      };
+      requestAnimationFrame(tick);
+    }
+
+    document.getElementById("newReport").addEventListener("click", start);
+    document.getElementById("cancelBtn").addEventListener("click", showList);
+    document.getElementById("draftBtn").addEventListener("click", () => {});
+    document.getElementById("backBtn").addEventListener("click", () => { if (state.index > 0) { state.index -= 1; render(); } });
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      if (currentId() === "basic" && state.route.length === 2) state.route = ["basic", "witness"];
+      if (currentId() === "witness") ensureRouteByWitness();
+      if (currentId() === "report") { showList(); return; }
+      if (state.index < state.route.length - 1) {
+        state.index += 1;
+        render();
+      }
+    });
+  </script>
+</body>
+</html>
